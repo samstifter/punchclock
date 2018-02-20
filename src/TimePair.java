@@ -15,4 +15,22 @@ public class TimePair {
 	public long getElapsedTime() {
         return end - start;
     }
+	
+	/**
+	 * Gets the start time in milliseconds format
+	 * 
+	 * @return start time
+	 */
+	public long getStartTime(){
+		return this.start;
+	}
+	
+	/**
+	 * Gets the end time in milliseconds format
+	 *  
+	 * @return end time
+	 */
+	public long getEndTime(){
+		return this.end;
+	}
 }
