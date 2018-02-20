@@ -1,3 +1,8 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+
 /**
  * The TimeController class is the Controller component of the MVC framework. 
  * It acts as a 
@@ -31,8 +36,11 @@ public class TimeController {
 	
 	/**
 	 * Resets the TimeModel, removing any TimePairs and "stopping" the time
+	 * Also writes the session to the file. 
 	 */
 	public void resetTime() {
+		timeModel.stopTime();
+		this.saveLoggedTime();
 		timeModel.resetTime();
 	}
 	
@@ -58,5 +66,36 @@ public class TimeController {
 	 */
 	public void displayElapsedTimeInSeconds(TimeModel timeModel) {
 		timeView.displayElapsedTimeInSeconds(timeModel);
+	}
+	
+	/**
+	 * Writes the time pairs of the current session to a file in CSV 
+	 * format. 
+	 * @return true if file is written, false otherwise.
+	 */
+	public boolean saveLoggedTime(){
+		String filename = "userdata.csv";
+		List<TimePair> timePairList = timeModel.getTimePairList();
+		
+		PrintWriter out;
+		try {
+			//Initialize Printwriter, uses filewriter so lines are appended instead of overwritten.
+			out = new PrintWriter(new FileWriter(filename, true));
+		} catch (IOException e) {
+			// If an exception with opening the file happens, return false.
+			return false;
+		}
+		
+		//Go through each pair of times
+		for (TimePair tp : timePairList){
+			//Print both times, each one followed by a comma.
+			out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
+		}
+		//  Add a new line at the end of the session.
+		out.print("\n");
+	
+		out.close();
+
+		return true;
 	}
 }
