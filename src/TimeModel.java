@@ -72,4 +72,13 @@ public class TimeModel {
         lastStart = 0;
         timePairList.clear();
     }
+    
+    /**
+     * Returns the list of time pairs
+     * 
+     * @return List of time pairs.
+     */
+    public List<TimePair> getTimePairList(){
+    	return timePairList;
+    }
 }
