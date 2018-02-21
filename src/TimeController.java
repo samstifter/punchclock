@@ -1,7 +1,15 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 
 /**
  * The TimeController class is the Controller component of the MVC framework. 
@@ -95,7 +103,48 @@ public class TimeController {
 		out.print("\n");
 	
 		out.close();
-
 		return true;
+	}
+	
+	public boolean loadLoggedTime(Stage mainStage) {
+		FileChooser fileChooser = new FileChooser();
+		 fileChooser.setTitle("Open Resource File");
+		 fileChooser.getExtensionFilters().addAll(
+		         new ExtensionFilter("CSV Files", "*.csv"),
+		         new ExtensionFilter("All Files", "*.*"));
+		 File selectedFile = fileChooser.showOpenDialog(mainStage);
+		 if (selectedFile != null) {
+			Scanner key = null;
+			try {
+				key = new Scanner(selectedFile);
+			} catch (FileNotFoundException e) {
+				System.err.println("FileNotFoundException");
+				e.printStackTrace();
+			}
+			 List<String> lines = new ArrayList<String>();
+			 while(key.hasNextLine()) {
+				 lines.add(key.nextLine());
+			 }
+			 
+			 //Checks if all lines have 2 times
+			 String[] times;
+			 for(String line : lines) {
+				 times = line.split(",");
+				 if(times.length != 2) {
+					 System.err.println("File Data Incorrect");
+					 return false;
+				 }
+			 }
+			 
+			 //saves times as timepairs
+			 for(String line : lines) {
+				 times = line.split(",");
+				 TimePair tp = new TimePair(Long.parseLong(times[0]),Long.parseLong(times[1]));
+				 timeModel.addTimePair(tp);
+			 }
+			 return true;
+		 }
+		 System.err.println("File is Null");
+		return false;
 	}
 }

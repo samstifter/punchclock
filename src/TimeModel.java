@@ -81,4 +81,13 @@ public class TimeModel {
     public List<TimePair> getTimePairList(){
     	return timePairList;
     }
+    
+    /**
+     * Adds a specified timepair to the current list
+     * @param tp The timepair list to add to the list
+     */
+    public void addTimePair(TimePair tp) {
+    	if(tp != null)
+    		timePairList.add(tp);
+    }
 }

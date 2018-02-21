@@ -38,6 +38,7 @@ public class Main extends Application implements Runnable{
         Text txt = new Text("Test");
         Button startButton = new Button("Start");
         Button resetButton = new Button("Reset");
+        Button importButton = new Button("Import Logs");
         startButton.setOnAction(a -> {
         	startClicked = !startClicked;
         	if(startClicked) {
@@ -58,8 +59,11 @@ public class Main extends Application implements Runnable{
         	timeController.stopTime();
         	timeController.resetTime();
         });
+        importButton.setOnAction(a -> {
+        	timeController.loadLoggedTime(primaryStage);
+        });
         VBox vb = new VBox();
-        vb.getChildren().addAll(txt,startButton,resetButton);
+        vb.getChildren().addAll(txt,startButton,resetButton,importButton);
         
         //====Canvas====
         Canvas canvas = new Canvas(300,300);
