@@ -1,12 +1,17 @@
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -39,6 +44,7 @@ public class Main extends Application implements Runnable{
         Button startButton = new Button("Start");
         Button resetButton = new Button("Reset");
         Button importButton = new Button("Import Logs");
+        Button viewPrevious = new Button("View Previous Sessions");
         startButton.setOnAction(a -> {
         	startClicked = !startClicked;
         	if(startClicked) {
@@ -59,11 +65,45 @@ public class Main extends Application implements Runnable{
         	timeController.stopTime();
         	timeController.resetTime();
         });
-        importButton.setOnAction(a -> {
-        	timeController.loadLoggedTime(primaryStage);
+        
+        viewPrevious.setOnAction(a -> {
+        	Stage previousLogWindow = new Stage();
+        	previousLogWindow.setTitle("Previous Session Logs");
+        	
+        	// Add a text title inside the window
+        	Text title = new Text("Previous Session Logs");
+        	title.setFont(new Font(18));
+        	
+        	//This is where the imported list should go.
+        	ObservableList<String> logList = FXCollections.observableArrayList("2018-01-01 00:00 1:50", "2018-01-01 00:00 2:50");
+        	ListView<String> logs = new ListView<String>(logList);
+        	
+        	// Set the size for the list
+        	logs.setPrefHeight(200);
+        	logs.setPrefWidth(300);
+        	
+        	// Add a button to export the logs
+        	Button exportButton = new Button("Export Logs");
+        	
+        	//Export Button Handler
+        	exportButton.setOnAction(b -> {
+        		// Implement Export Class
+        	});
+        	
+        	// Make a layout, and add everything to it, centered
+        	VBox layout = new VBox(10);
+            layout.getChildren().addAll(title, logs, exportButton);
+            layout.setAlignment(Pos.CENTER);
+            previousLogWindow.setScene(new Scene(layout, 300, 300));
+            previousLogWindow.show();	
         });
+
+		importButton.setOnAction(a -> {
+			timeController.loadLoggedTime(primaryStage);
+		});
+        
         VBox vb = new VBox();
-        vb.getChildren().addAll(txt,startButton,resetButton,importButton);
+        vb.getChildren().addAll(txt,startButton,resetButton,viewPrevious,importButton);
         
         //====Canvas====
         Canvas canvas = new Canvas(300,300);
