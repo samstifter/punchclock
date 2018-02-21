@@ -1,7 +1,10 @@
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -38,6 +41,8 @@ public class Main extends Application implements Runnable{
         Text txt = new Text("Test");
         Button startButton = new Button("Start");
         Button resetButton = new Button("Reset");
+        Button viewPrevious = new Button("View Previous Sessions");
+        
         startButton.setOnAction(a -> {
         	startClicked = !startClicked;
         	if(startClicked) {
@@ -58,8 +63,28 @@ public class Main extends Application implements Runnable{
         	timeController.stopTime();
         	timeController.resetTime();
         });
+        
+        viewPrevious.setOnAction(a -> {
+        	Stage previousLogWindow = new Stage();
+        	previousLogWindow.setTitle("Previous Logs");
+        	
+        	//This is where the imported list should go.
+        	ObservableList<String> logList = FXCollections.observableArrayList("2018-01-01 00:00 1:50", "2018-01-01 00:00 2:50");
+        	ListView<String> logs = new ListView<String>(logList);
+        	
+        	logs.setPrefHeight(300);
+        	logs.setPrefWidth(300);
+        	
+        	VBox root = new VBox();
+            root.getChildren().add(logs);
+            previousLogWindow.setScene(new Scene(root, 200, 250));
+            previousLogWindow.show();
+        	
+        	
+        	});
+        
         VBox vb = new VBox();
-        vb.getChildren().addAll(txt,startButton,resetButton);
+        vb.getChildren().addAll(txt,startButton,resetButton,viewPrevious);
         
         //====Canvas====
         Canvas canvas = new Canvas(300,300);
