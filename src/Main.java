@@ -75,13 +75,11 @@ public class Main extends Application implements Runnable{
         	logs.setPrefHeight(300);
         	logs.setPrefWidth(300);
         	
-        	VBox root = new VBox();
-            root.getChildren().add(logs);
-            previousLogWindow.setScene(new Scene(root, 200, 250));
-            previousLogWindow.show();
-        	
-        	
-        	});
+        	VBox layout = new VBox();
+            layout.getChildren().add(logs);
+            previousLogWindow.setScene(new Scene(layout, 300, 300));
+            previousLogWindow.show();	
+        });
         
         VBox vb = new VBox();
         vb.getChildren().addAll(txt,startButton,resetButton,viewPrevious);
