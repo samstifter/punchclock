@@ -1,6 +1,9 @@
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
 /**
  * The TimeModel class is the Model component of the MVC framework. 
  * It acts as a storage class for all data pertaining to the time 'structure'
@@ -11,20 +14,26 @@ import java.util.List;
 public class TimeModel {
     private long lastStart;
     private boolean isStarted;
-    private List<TimePair> timePairList;
-
+    //private List<TimePair> timePairList;
+    private List<Session> sessions;
+    //int currentSession;
+    private Session currSession;
+    
     public TimeModel() {
         lastStart = 0;
-        timePairList = new ArrayList<TimePair>();
+        sessions = new ArrayList<Session>();
+        currSession = new Session();
+        sessions.add(currSession);
+        
     }
 
     /**
      *
      * @return Total Elapsed milliseconds between all starts/stops
      */
-    public long getTotalElapsedTime() {
+    public long getCurrentSessionTime() {
         long totalTime = 0;
-        for(TimePair tp : timePairList) {
+        for(TimePair tp : currSession.getTimePairList()) {//Gets last timepairlist of sessions
             totalTime += tp.getElapsedTime();
         }
         if(lastStart != 0)
@@ -54,7 +63,7 @@ public class TimeModel {
      */
     public boolean stopTime() {
         if(isStarted) {
-            timePairList.add(new TimePair(lastStart,System.currentTimeMillis()));
+            currSession.getTimePairList().add(new TimePair(lastStart,System.currentTimeMillis()));
             lastStart = 0;
             isStarted = false;
         }
@@ -70,7 +79,9 @@ public class TimeModel {
     public void resetTime() {
         isStarted = false;
         lastStart = 0;
-        timePairList.clear();
+        //timePairList.clear();
+        currSession = new Session();
+        sessions.add(currSession);
     }
     
     /**
@@ -78,8 +89,8 @@ public class TimeModel {
      * 
      * @return List of time pairs.
      */
-    public List<TimePair> getTimePairList(){
-    	return timePairList;
+    public List<TimePair> getCurrentTimePairList(){
+    	return currSession.getTimePairList();
     }
     
     /**
@@ -88,6 +99,16 @@ public class TimeModel {
      */
     public void addTimePair(TimePair tp) {
     	if(tp != null)
-    		timePairList.add(tp);
+    		currSession.getTimePairList().add(tp);
     }
+
+	public ArrayList<String> getFormattedTimePairList() {
+		ArrayList<String> list = new ArrayList<String>();
+		for (TimePair time : currSession.getTimePairList()) {
+			list.add(time.toString());
+		}
+		
+		
+		return list;
+	}
 }

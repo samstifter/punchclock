@@ -57,7 +57,7 @@ public class TimeController {
 	 * @return Total Elapsed milliseconds between all starts/stops
 	 */
 	public long getTotalElapsedTime() {
-		return timeModel.getTotalElapsedTime();
+		return timeModel.getCurrentElapsedTime();
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class TimeController {
 	 */
 	public boolean saveLoggedTime(){
 		String filename = "userdata.csv";
-		List<TimePair> timePairList = timeModel.getTimePairList();
+		List<TimePair> timePairList = timeModel.getCurrentTimePairList();
 		
 		PrintWriter out;
 		try {
@@ -130,7 +130,8 @@ public class TimeController {
 			 String[] times;
 			 for(String line : lines) {
 				 times = line.split(",");
-				 if(times.length != 2) {
+				 System.out.println(times[0].isEmpty());
+				 if(times.length != 2 && !times[0].isEmpty()) {
 					 System.err.println("File Data Incorrect");
 					 return false;
 				 }
@@ -139,8 +140,10 @@ public class TimeController {
 			 //saves times as timepairs
 			 for(String line : lines) {
 				 times = line.split(",");
-				 TimePair tp = new TimePair(Long.parseLong(times[0]),Long.parseLong(times[1]));
-				 timeModel.addTimePair(tp);
+				 if(!times[0].isEmpty()) {
+					 TimePair tp = new TimePair(Long.parseLong(times[0]),Long.parseLong(times[1]));
+					 timeModel.addTimePair(tp);
+				 }
 			 }
 			 return true;
 		 }

@@ -15,7 +15,7 @@ public class TimeView {
 	 * @param timeModel, the model you wish to display the time of
 	 */
 	public void displayElapsedTimeInSeconds(TimeModel timeModel) {
-		double time = timeModel.getTotalElapsedTime() / 1000.0;
+		double time = timeModel.getCurrentSessionTime() / 1000.0;
 		//System.out.println(time);
 		System.out.printf("Total Elapsed Time: %4.2f Seconds\n", time);
 	}

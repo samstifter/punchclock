@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -75,7 +78,12 @@ public class Main extends Application implements Runnable{
         	title.setFont(new Font(18));
         	
         	//This is where the imported list should go.
-        	ObservableList<String> logList = FXCollections.observableArrayList("2018-01-01 00:00 1:50", "2018-01-01 00:00 2:50");
+        	/*
+        	List<String> li = new ArrayList<String>();
+        	li.add("2018-01-01 00:00 1:50");
+        	li.add("2018-01-01 00:00 2:50");
+        	*/
+        	ObservableList<String> logList = FXCollections.observableArrayList(timeModel.getFormattedTimePairList());
         	ListView<String> logs = new ListView<String>(logList);
         	
         	// Set the size for the list

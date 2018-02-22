@@ -1,3 +1,7 @@
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TimePair {
 	private long start;
@@ -32,5 +36,26 @@ public class TimePair {
 	 */
 	public long getEndTime(){
 		return this.end;
+	}
+	
+	public String toString() {
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		
+		Date dateStart = new Date(this.start);
+		Date dateEnd = new Date(this.end);
+		
+		/*
+		try {
+			dateStart = dateFormat.parse(Long.toString(this.start));
+			dateEnd = dateFormat.parse(Long.toString(this.end));
+		} catch (ParseException e) {
+			System.err.println("Failure to parse a timepair");
+			e.printStackTrace();
+		}
+		*/
+		
+		
+		return dateFormat.format(dateStart) + " - " + dateFormat.format(dateEnd);
 	}
 }
