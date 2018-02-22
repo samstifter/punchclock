@@ -101,13 +101,28 @@ public class TimeModel {
     	if(tp != null)
     		currSession.getTimePairList().add(tp);
     }
+    
+    public void addSession(Session session) {
+    	this.sessions.add(session);
+    }
 
 	public ArrayList<String> getFormattedTimePairList() {
 		ArrayList<String> list = new ArrayList<String>();
+		
+		for(int i = 0; i < this.sessions.size(); i++) {
+			//if(i != this.sessions.size() - 1) {//ignore current session
+				for(TimePair time : this.sessions.get(i).getTimePairList()) {
+					list.add(time.toString());
+				}
+			//}
+		}
+		
+		/*
 		for (TimePair time : currSession.getTimePairList()) {
 			list.add(time.toString());
 		}
-		
+		list.add("Old Sessions:");
+		*/
 		
 		return list;
 	}

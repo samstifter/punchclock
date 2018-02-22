@@ -125,7 +125,7 @@ public class TimeController {
 			 while(key.hasNextLine()) {
 				 lines.add(key.nextLine());
 			 }
-			 
+			 key.close();
 			 //Checks if all lines have 2 times
 			 String[] times;
 			 for(String line : lines) {
@@ -137,14 +137,16 @@ public class TimeController {
 				 }
 			 }
 			 
+			 Session session = new Session();
 			 //saves times as timepairs
 			 for(String line : lines) {
 				 times = line.split(",");
 				 if(!times[0].isEmpty()) {
 					 TimePair tp = new TimePair(Long.parseLong(times[0]),Long.parseLong(times[1]));
-					 timeModel.addTimePair(tp);
+					 session.addTimePair(tp);
 				 }
 			 }
+			 timeModel.addSession(session);
 			 return true;
 		 }
 		 System.err.println("File is Null");
