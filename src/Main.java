@@ -46,8 +46,8 @@ public class Main extends Application {
 
 	public void runTask() {
 		while (true) {
-			//timeController.displayElapsedTimeInSeconds(timeModel);
-			txt.setText(Double.toString(timeController.getCurrentElapsedTime() / 1000.0));
+			timeController.displayElapsedTimeInSeconds(timeModel);
+			//txt.setText(Double.toString(timeController.getCurrentElapsedTime() / 1000.0));
 		}
 	}
 
