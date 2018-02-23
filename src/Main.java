@@ -1,8 +1,8 @@
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -47,7 +47,33 @@ public class Main extends Application {
 
 	public void runTask() {
 		while (true) {
-			timeController.displayElapsedTimeInSeconds(timeModel);
+			//if(startClicked) {
+				try {
+				Platform.runLater(new Runnable() 
+				{
+		            @Override 
+		            public void run() 
+		            {
+		            	txt.setText(Double.toString(timeController.getCurrentSessionElapsedTime() / 1000.0));
+		            }
+		        });
+		
+				Thread.sleep(50);
+				}
+				catch (InterruptedException e) 
+				{
+					e.printStackTrace();
+				}
+			//}
+				/*
+			else {
+				if(timeController.getCurrentSessionElapsedTime() == 0) {
+					txt.setText("0");
+				}
+				break;
+			}
+			*/
+			//timeController.displayElapsedTimeInSeconds(timeModel);
 			//txt.setText(Double.toString(timeController.getCurrentElapsedTime() / 1000.0));
 		}
 	}

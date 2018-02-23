@@ -60,16 +60,18 @@ public class TimeController {
 	 * @return Total Elapsed milliseconds between all starts/stops
 	 */
 	public long getTotalElapsedTime() {
-		return timeModel.getCurrentElapsedTime();
+		return timeModel.getTotalSessionTime();
 	}
 	
 	/**
 	 * Get the time of only the most recent session
 	 * @return the elapsed time of the most recent session
 	 */
-	public long getCurrentElapsedTime() {
-		return timeModel.getCurrentElapsedTime();
+	public long getCurrentSessionElapsedTime() {
+		return timeModel.getCurrentSessionTime();
 	}
+	
+	
 	
 	/**
 	 * Displays the total elapsed time to the console
