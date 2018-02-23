@@ -29,7 +29,7 @@ public class TimeModel {
 
     /**
      *
-     * @return Total Elapsed milliseconds between all starts/stops
+     * @return Total Elapsed milliseconds of current session
      */
     public long getCurrentSessionTime() {
         long totalTime = 0;
@@ -125,5 +125,13 @@ public class TimeModel {
 		*/
 		
 		return list;
+	}
+
+	public long getTotalSessionTime() {
+		long time = 0;
+		for(Session session : sessions) {
+			time += session.getTotalTime();
+		}
+		return time;
 	}
 }

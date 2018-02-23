@@ -31,6 +31,14 @@ public class Session {
     	if(tp != null)
     		timePairList.add(tp);
     }
+
+	public long getTotalTime() {
+		long time = 0;
+		for(TimePair tp : timePairList) {
+			time += tp.getElapsedTime();
+		}
+		return time;
+	}
 	
 	
 }
