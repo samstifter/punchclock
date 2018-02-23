@@ -131,7 +131,7 @@ public class TimeController {
 			 for(String line : lines) {
 				 times = line.split(",");
 				 System.out.println(times[0].isEmpty());
-				 if(times.length != 2 && !times[0].isEmpty()) {
+				 if((times.length % 2) != 0 && !times[0].isEmpty()) {
 					 System.err.println("File Data Incorrect");
 					 return false;
 				 }
