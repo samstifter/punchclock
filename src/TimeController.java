@@ -3,7 +3,10 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -105,6 +108,31 @@ public class TimeController {
 		out.print("\n");
 	
 		out.close();
+		return true;
+	}
+
+	public boolean writeToReadableFile() throws FileNotFoundException {
+		PrintWriter pw = new PrintWriter(new File("UserLogs.csv"));
+		StringBuilder sb = new StringBuilder();
+		sb.append("Start Time:");
+		sb.append(",");
+		sb.append("End Time");
+		sb.append("\n");
+
+		for (TimePair pair : timeModel.getCurrentTimePairList()) {
+			Date timeBegin = new Date(pair.getStartTime());
+			Date timeEnd = new Date(pair.getEndTime());
+			DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
+			String startTime = dateFormat.format(timeBegin);
+			String endTime = dateFormat.format(timeEnd);
+			sb.append(startTime);
+			sb.append(",");
+			sb.append(endTime);
+			sb.append("\n");
+		}
+		pw.write(sb.toString());
+		pw.close();
+
 		return true;
 	}
 	

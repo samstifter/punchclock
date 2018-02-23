@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Application;
@@ -140,7 +141,13 @@ public class Main extends Application {
         	//Export Button Handler
         	exportButton.setOnAction(b -> {
         		// Implement Export Class
-        	});
+				try {
+					timeController.writeToReadableFile();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+
+			});
 
         	// Make a layout, and add everything to it, centered
         	VBox layout = new VBox(10);
