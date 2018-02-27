@@ -51,7 +51,7 @@ public class TimeController {
 	 */
 	public void resetTime() {
 		timeModel.stopTime();
-		this.saveLoggedTime();
+		this.saveCurrentSession();
 		timeModel.resetTime();
 	}
 	
@@ -86,7 +86,7 @@ public class TimeController {
 	 * format. 
 	 * @return true if file is written, false otherwise.
 	 */
-	public boolean saveLoggedTime(){
+	public boolean saveCurrentSession(){
 		File outDir = new File("output");
 		File outFile = new File("output/userdata.csv");
 		
