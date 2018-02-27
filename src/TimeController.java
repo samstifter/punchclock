@@ -152,7 +152,7 @@ public class TimeController {
 		return true;
 	}
 
-	public boolean loadSavedSessions(Stage mainStage) {
+	public boolean loadSavedSessions() {
 		File saveFile = new File("output/userdata.csv");
 
 		Scanner key;

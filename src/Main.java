@@ -128,7 +128,7 @@ public class Main extends Application {
         	li.add("2018-01-01 00:00 1:50");
         	li.add("2018-01-01 00:00 2:50");
         	*/
-        	ObservableList<String> logList = FXCollections.observableArrayList(timeModel.getFormattedTimePairList());
+        	ObservableList<String> logList = FXCollections.observableArrayList(timeModel.getFormattedSessionList());
         	ListView<String> logs = new ListView<String>(logList);
 
         	// Set the size for the list
@@ -158,7 +158,7 @@ public class Main extends Application {
         });
 
 		importButton.setOnAction(a -> {
-			timeController.loadSavedSessions(primaryStage);
+			timeController.loadSavedSessions();
 		});
 
         VBox vb = new VBox();
