@@ -1,6 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 /**
@@ -148,6 +152,43 @@ public class TimeModel {
 				this.addSession(session);
 			}
 		}
+		return true;
+	}
+	
+	public boolean writeToReadableFile() throws FileNotFoundException {
+		File outDir = new File("output");
+		File outFile = new File("output/UserLogs.csv");
+
+		// Make the directory if it doesn't exist.
+		try {
+			outDir.mkdir();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+		
+		PrintWriter pw = new PrintWriter(outFile);
+		StringBuilder sb = new StringBuilder();
+		sb.append("Start Time:");
+		sb.append(",");
+		sb.append("End Time");
+		sb.append("\n");
+
+		for(Session session: this.sessions){
+			for (TimePair pair : session.getTimePairList()) {
+				Date timeBegin = new Date(pair.getStartTime());
+				Date timeEnd = new Date(pair.getEndTime());
+				DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
+				String startTime = dateFormat.format(timeBegin);
+				String endTime = dateFormat.format(timeEnd);
+				sb.append(startTime);
+				sb.append(",");
+				sb.append(endTime);
+				sb.append("\n");
+			}
+		}
+		pw.write(sb.toString());
+		pw.close();
+
 		return true;
 	}
 }
