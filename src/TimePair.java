@@ -1,5 +1,4 @@
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -14,7 +13,7 @@ public class TimePair {
 	
 	/**
 	 * 
-	 * @return Time between 2 times in seconds
+	 * @return Time between 2 times in milliseconds
 	 */
 	public long getElapsedTime() {
         return end - start;
@@ -40,22 +39,18 @@ public class TimePair {
 	
 	public String toString() {
 		
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		//DateFormat durationFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		
 		Date dateStart = new Date(this.start);
-		Date dateEnd = new Date(this.end);
 		
-		/*
-		try {
-			dateStart = dateFormat.parse(Long.toString(this.start));
-			dateEnd = dateFormat.parse(Long.toString(this.end));
-		} catch (ParseException e) {
-			System.err.println("Failure to parse a timepair");
-			e.printStackTrace();
-		}
-		*/
+		// get duration and convert to seconds
+		int durationSeconds = (int)this.getElapsedTime() / 1000;
+		int durationMinutes = durationSeconds / 60;
+		int durationHours = durationMinutes / 60;
 		
+		String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes, durationSeconds);
 		
-		return dateFormat.format(dateStart) + " - " + dateFormat.format(dateEnd);
+		return dateFormat.format(dateStart) + " - " + durationString;
 	}
 }
