@@ -40,7 +40,6 @@ public class TimePair {
 	public String toString() {
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		//DateFormat durationFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		
 		Date dateStart = new Date(this.start);
 		

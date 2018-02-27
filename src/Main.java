@@ -1,6 +1,4 @@
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -47,34 +45,22 @@ public class Main extends Application {
 
 	public void runTask() {
 		while (true) {
-			//if(startClicked) {
-				try {
-				Platform.runLater(new Runnable() 
-				{
-		            @Override 
-		            public void run() 
-		            {
-		            	txt.setText(Double.toString(timeController.getCurrentSessionElapsedTime() / 1000.0));
-		            }
-		        });
-		
-				Thread.sleep(50);
-				}
-				catch (InterruptedException e) 
-				{
-					e.printStackTrace();
-				}
-			//}
-				/*
-			else {
-				if(timeController.getCurrentSessionElapsedTime() == 0) {
-					txt.setText("0");
-				}
-				break;
+			try {
+			Platform.runLater(new Runnable() 
+			{
+	            @Override 
+	            public void run() 
+	            {
+	            	txt.setText(Double.toString(timeController.getCurrentSessionElapsedTime() / 1000.0));
+	            }
+	        });
+	
+			Thread.sleep(50);
 			}
-			*/
-			//timeController.displayElapsedTimeInSeconds(timeModel);
-			//txt.setText(Double.toString(timeController.getCurrentElapsedTime() / 1000.0));
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -92,7 +78,6 @@ public class Main extends Application {
         txt = new Text("Test");
         Button startButton = new Button("Start");
         Button resetButton = new Button("Reset");
-        Button importButton = new Button("Import Logs");
         Button viewPrevious = new Button("View Previous Sessions");
         startButton.setOnAction(a -> {
         	startClicked = !startClicked;
@@ -122,12 +107,6 @@ public class Main extends Application {
         	Text title = new Text("Previous Session Logs");
         	title.setFont(new Font(18));
 
-        	//This is where the imported list should go.
-        	/*
-        	List<String> li = new ArrayList<String>();
-        	li.add("2018-01-01 00:00 1:50");
-        	li.add("2018-01-01 00:00 2:50");
-        	*/
         	ObservableList<String> logList = FXCollections.observableArrayList(timeModel.getFormattedSessionList());
         	ListView<String> logs = new ListView<String>(logList);
 
@@ -157,12 +136,8 @@ public class Main extends Application {
             previousLogWindow.show();
         });
 
-		importButton.setOnAction(a -> {
-			timeController.loadSavedSessions();
-		});
-
         VBox vb = new VBox();
-        vb.getChildren().addAll(txt,startButton,resetButton,viewPrevious,importButton);
+        vb.getChildren().addAll(txt,startButton,resetButton,viewPrevious);
 
         //====Canvas====
         Canvas canvas = new Canvas(300,300);
@@ -179,13 +154,10 @@ public class Main extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.show();
-
-
 	}
 
 	@Override
 	public void stop(){
 	    System.out.println("Stage is closing");
 	}
-
 }

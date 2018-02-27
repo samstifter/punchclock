@@ -1,9 +1,8 @@
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 /**
  * The TimeModel class is the Model component of the MVC framework. 
  * It acts as a storage class for all data pertaining to the time 'structure'
@@ -14,17 +13,14 @@ import java.util.List;
 public class TimeModel {
     private long lastStart;
     private boolean isStarted;
-    //private List<TimePair> timePairList;
     private List<Session> sessions;
-    //int currentSession;
     private Session currSession;
     
     public TimeModel() {
         lastStart = 0;
         sessions = new ArrayList<Session>();
+        loadSavedSessions();
         currSession = new Session();
-        sessions.add(currSession);
-        
     }
 
     /**
@@ -32,12 +28,9 @@ public class TimeModel {
      * @return Total Elapsed milliseconds of current session
      */
     public long getCurrentSessionTime() {
-        long totalTime = 0;
-        for(TimePair tp : currSession.getTimePairList()) {//Gets last timepairlist of sessions
-            totalTime += tp.getElapsedTime();
-        }
-        if(lastStart != 0)
-            totalTime += getCurrentElapsedTime();
+        long totalTime = currSession.getTotalTime();
+        if(isStarted)
+            totalTime += getTimeSinceLastStart();
         return totalTime;
     }
 
@@ -45,7 +38,7 @@ public class TimeModel {
      * Get the time of only the most recent session
      * @return the elapsed time of the most recent session
      */
-    public long getCurrentElapsedTime() {
+    private long getTimeSinceLastStart() {
         return System.currentTimeMillis() - lastStart;
     }
 
@@ -79,9 +72,8 @@ public class TimeModel {
     public void resetTime() {
         isStarted = false;
         lastStart = 0;
-        //timePairList.clear();
-        currSession = new Session();
         sessions.add(currSession);
+        currSession = new Session();
     }
     
     /**
@@ -89,49 +81,61 @@ public class TimeModel {
      * 
      * @return List of time pairs.
      */
-    public List<TimePair> getCurrentTimePairList(){
-    	return currSession.getTimePairList();
-    }
-    
-    /**
-     * Adds a specified timepair to the current list
-     * @param tp The timepair list to add to the list
-     */
-    public void addTimePair(TimePair tp) {
-    	if(tp != null)
-    		currSession.getTimePairList().add(tp);
+    public Session getCurrentSession(){
+    	return currSession;
     }
     
     public void addSession(Session session) {
     	this.sessions.add(session);
     }
 
-	public ArrayList<String> getFormattedTimePairList() {
+	public ArrayList<String> getFormattedSessionList() {
 		ArrayList<String> list = new ArrayList<String>();
-		
-		for(int i = 0; i < this.sessions.size(); i++) {
-			//if(i != this.sessions.size() - 1) {//ignore current session
-				for(TimePair time : this.sessions.get(i).getTimePairList()) {
-					list.add(time.toString());
-				}
-			//}
-		}
-		
-		/*
-		for (TimePair time : currSession.getTimePairList()) {
-			list.add(time.toString());
-		}
-		list.add("Old Sessions:");
-		*/
-		
+		for(Session session : this.sessions) {
+			list.add(session.toString());
+		}		
 		return list;
 	}
+	
+	private boolean loadSavedSessions() {
+		File saveFile = new File("output/userdata.csv");
 
-	public long getTotalSessionTime() {
-		long time = 0;
-		for(Session session : sessions) {
-			time += session.getTotalTime();
+		Scanner key;
+		try {
+			key = new Scanner(saveFile);
+		} catch (FileNotFoundException e) {
+			System.err.println("FileNotFoundException");
+			return false;
 		}
-		return time;
+		List<String> sessions = new ArrayList<String>();
+		while (key.hasNextLine()) {
+			sessions.add(key.nextLine());
+		}
+		key.close();
+
+		// Checks if all lines have 2 times
+		String[] times;
+		for (String session : sessions) {
+			times = session.split(",");
+			System.out.println(times[0].isEmpty());
+			if ((times.length % 2) != 0 && !times[0].isEmpty()) {
+				System.err.println("File Data Incorrect");
+				return false;
+			}
+		}
+
+		// saves times as timepairs, and add to a session.
+		for (String line : sessions) {
+			Session session = new Session();
+			times = line.split(",");
+			if (!times[0].isEmpty()) {
+				for (int i = 0; i < times.length - 1; i += 2) {
+					TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
+					session.addTimePair(tp);
+				}
+				this.addSession(session);
+			}
+		}
+		return true;
 	}
 }

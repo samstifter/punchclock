@@ -5,15 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
-
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Stage;
-
 /**
  * The TimeController class is the Controller component of the MVC framework. It
  * acts as a Read more about MVC archecture <a href=
@@ -58,15 +51,6 @@ public class TimeController {
 	}
 
 	/**
-	 * Get the total elapsed time over all sessions of this TimeModel
-	 * 
-	 * @return Total Elapsed milliseconds between all starts/stops
-	 */
-	public long getTotalElapsedTime() {
-		return timeModel.getTotalSessionTime();
-	}
-
-	/**
 	 * Get the time of only the most recent session
 	 * 
 	 * @return the elapsed time of the most recent session
@@ -94,7 +78,7 @@ public class TimeController {
 		File outDir = new File("output");
 		File outFile = new File("output/userdata.csv");
 
-		List<TimePair> timePairList = timeModel.getCurrentTimePairList();
+		List<TimePair> timePairList = timeModel.getCurrentSession().getTimePairList();
 
 		// Make the directory if it doesn't exist.
 		try {
@@ -135,7 +119,7 @@ public class TimeController {
 		sb.append("End Time");
 		sb.append("\n");
 
-		for (TimePair pair : timeModel.getCurrentTimePairList()) {
+		for (TimePair pair : timeModel.getCurrentSession().getTimePairList()) {
 			Date timeBegin = new Date(pair.getStartTime());
 			Date timeEnd = new Date(pair.getEndTime());
 			DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
@@ -149,48 +133,6 @@ public class TimeController {
 		pw.write(sb.toString());
 		pw.close();
 
-		return true;
-	}
-
-	public boolean loadSavedSessions() {
-		File saveFile = new File("output/userdata.csv");
-
-		Scanner key;
-		try {
-			key = new Scanner(saveFile);
-		} catch (FileNotFoundException e) {
-			System.err.println("FileNotFoundException");
-			return false;
-		}
-		List<String> sessions = new ArrayList<String>();
-		while (key.hasNextLine()) {
-			sessions.add(key.nextLine());
-		}
-		key.close();
-
-		// Checks if all lines have 2 times
-		String[] times;
-		for (String session : sessions) {
-			times = session.split(",");
-			System.out.println(times[0].isEmpty());
-			if ((times.length % 2) != 0 && !times[0].isEmpty()) {
-				System.err.println("File Data Incorrect");
-				return false;
-			}
-		}
-
-		// saves times as timepairs, and add to a session.
-		for (String line : sessions) {
-			Session session = new Session();
-			times = line.split(",");
-			if (!times[0].isEmpty()) {
-				for (int i = 0; i < times.length - 1; i += 2) {
-					TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
-					session.addTimePair(tp);
-				}
-				timeModel.addSession(session);
-			}
-		}
 		return true;
 	}
 }
