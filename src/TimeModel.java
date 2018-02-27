@@ -16,11 +16,14 @@ public class TimeModel {
     private List<Session> sessions;
     private Session currSession;
     
+    /**
+     * 
+     */
     public TimeModel() {
-        lastStart = 0;
-        sessions = new ArrayList<Session>();
+        this.lastStart = 0;
+        this.sessions = new ArrayList<Session>();
         loadSavedSessions();
-        currSession = new Session();
+        this.currSession = new Session();
     }
 
     /**
@@ -39,15 +42,15 @@ public class TimeModel {
      * @return the elapsed time of the most recent session
      */
     private long getTimeSinceLastStart() {
-        return System.currentTimeMillis() - lastStart;
+        return System.currentTimeMillis() - this.lastStart;
     }
 
     /**
      * Starts the timer by recording the current time
      */
     public void startTime() {
-        lastStart = System.currentTimeMillis();
-        isStarted = true;
+    	this.lastStart = System.currentTimeMillis();
+    	this.isStarted = true;
     }
 
     /**
@@ -55,10 +58,10 @@ public class TimeModel {
      * @return True if the time was started (aka time was started previously), false otherwise
      */
     public boolean stopTime() {
-        if(isStarted) {
-            currSession.getTimePairList().add(new TimePair(lastStart,System.currentTimeMillis()));
-            lastStart = 0;
-            isStarted = false;
+        if(this.isStarted) {
+        	this.currSession.getTimePairList().add(new TimePair(lastStart,System.currentTimeMillis()));
+            this.lastStart = 0;
+            this.isStarted = false;
         }
         else {
             return false; // A Timer that is not started can not be stopped
@@ -70,10 +73,10 @@ public class TimeModel {
      * Resets the TimeModel, removing any TimePairs and "stopping" the time
      */
     public void resetTime() {
-        isStarted = false;
-        lastStart = 0;
-        sessions.add(currSession);
-        currSession = new Session();
+    	this.isStarted = false;
+    	this.lastStart = 0;
+        sessions.add(this.currSession);
+        this.currSession = new Session();
     }
     
     /**
@@ -82,13 +85,19 @@ public class TimeModel {
      * @return List of time pairs.
      */
     public Session getCurrentSession(){
-    	return currSession;
+    	return this.currSession;
     }
     
+    /**
+     * @param session
+     */
     public void addSession(Session session) {
     	this.sessions.add(session);
     }
 
+	/**
+	 * @return
+	 */
 	public ArrayList<String> getFormattedSessionList() {
 		ArrayList<String> list = new ArrayList<String>();
 		for(Session session : this.sessions) {
@@ -97,6 +106,9 @@ public class TimeModel {
 		return list;
 	}
 	
+	/**
+	 * @return
+	 */
 	private boolean loadSavedSessions() {
 		File saveFile = new File("output/userdata.csv");
 

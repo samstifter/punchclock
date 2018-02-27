@@ -4,37 +4,80 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * This class defines a Session.
+ * A session holds pairs of time pairs.
+ * 
+ */
 public class Session {
 	private String sessionName;
 	private List<TimePair> timePairList;
 	
+	/**
+	 * A session object holding a list of time pairs.
+	 */
 	public Session () {
-		timePairList = new ArrayList<TimePair>();
+		this.timePairList = new ArrayList<TimePair>();
 	}
 	
+	/**
+	 * A session object holding a list of time pairs with a given name.
+	 * @param name 
+	 * 		The name given to the session
+	 */
 	public Session(String name) {
-		sessionName = name;
-		timePairList = new ArrayList<TimePair>();
+		this.sessionName = name;
+		this.timePairList = new ArrayList<TimePair>();
 	}
 	
+	/**
+	 * Returns the name of the session.
+	 * @return Session name
+	 */
 	public String getSessionName() {
-		return sessionName;
+		return this.sessionName;
 	}
+	
+	/**
+	 * Sets the name of the session.
+	 * @param sessionName
+	 * 		name to set session
+	 */
 	public void setSessionName(String sessionName) {
 		this.sessionName = sessionName;
 	}
+	
+	/**
+	 * Returns the sessions list of time pairs.
+	 * @return
+	 * 		timePair
+	 */
 	public List<TimePair> getTimePairList() {
 		return timePairList;
 	}
+	
+	/**
+	 * Sets the sessions time pair list. 
+	 * @param timePairList
+	 */
 	public void setTimePairList(List<TimePair> timePairList) {
 		this.timePairList = timePairList;
 	}
 	
+	/**
+	 * 
+	 * @param tp
+	 */
 	public void addTimePair(TimePair tp) {
     	if(tp != null)
     		timePairList.add(tp);
     }
 
+	/**
+	 * Gets the total elapsed time of all time pairs in a session.
+	 * @return
+	 * 		Total elapsed time in session.
+	 */
 	public long getTotalTime() {
 		long time = 0;
 		for(TimePair tp : timePairList) {

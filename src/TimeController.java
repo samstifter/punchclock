@@ -19,6 +19,10 @@ public class TimeController {
 	private TimeModel timeModel;
 	private TimeView timeView;
 
+	/**
+	 * @param timeModel
+	 * @param timeView
+	 */
 	public TimeController(TimeModel timeModel, TimeView timeView) {
 		this.timeModel = timeModel;
 		this.timeView = timeView;
@@ -111,6 +115,10 @@ public class TimeController {
 		return true;
 	}
 
+	/**
+	 * @return
+	 * @throws FileNotFoundException
+	 */
 	public boolean writeToReadableFile() throws FileNotFoundException {
 		PrintWriter pw = new PrintWriter(new File("UserLogs.csv"));
 		StringBuilder sb = new StringBuilder();

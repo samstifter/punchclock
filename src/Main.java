@@ -17,6 +17,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+/**
+ * 
+ *
+ */
 public class Main extends Application {
 	static TimeModel timeModel;
 	static TimeView timeView;
