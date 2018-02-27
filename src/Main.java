@@ -158,7 +158,7 @@ public class Main extends Application {
         });
 
 		importButton.setOnAction(a -> {
-			timeController.loadLoggedTime(primaryStage);
+			timeController.loadSavedSessions(primaryStage);
 		});
 
         VBox vb = new VBox();
