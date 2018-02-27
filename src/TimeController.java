@@ -87,15 +87,27 @@ public class TimeController {
 	 * @return true if file is written, false otherwise.
 	 */
 	public boolean saveLoggedTime(){
-		String filename = "userdata.csv";
+		File outDir = new File("output");
+		File outFile = new File("output/userdata.csv");
+		
 		List<TimePair> timePairList = timeModel.getCurrentTimePairList();
+		
+		// Make the directory if it doesn't exist.
+	    try{
+	        outDir.mkdir();
+	    } 
+	    catch(Exception e){
+	        System.err.println(e.getMessage());
+	    }
 		
 		PrintWriter out;
 		try {
 			//Initialize Printwriter, uses filewriter so lines are appended instead of overwritten.
-			out = new PrintWriter(new FileWriter(filename, true));
+			out = new PrintWriter(new FileWriter(outFile, true));
 		} catch (IOException e) {
 			// If an exception with opening the file happens, return false.
+			System.err.println("Could not write file");
+			e.printStackTrace();
 			return false;
 		}
 		
