@@ -48,26 +48,23 @@ public class Main extends Application {
 	}
 
 	public void runTask() {
-		
-
-		
-		
 		while (true) {
 			try {
 				Platform.runLater(new Runnable() {
-					
+
 					int durationSeconds;
 					int durationMinutes;
 					int durationHours;
-					
+
 					@Override
 					public void run() {
-						durationSeconds = (int)timeController.getCurrentSessionElapsedTime() / 1000;
+						durationSeconds = (int) timeController.getCurrentSessionElapsedTime() / 1000;
 						durationMinutes = durationSeconds / 60;
 						durationHours = durationMinutes / 60;
-						
-						String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes, durationSeconds);
-						
+
+						String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes,
+								durationSeconds);
+
 						txt.setText(durationString);
 					}
 				});
@@ -87,18 +84,18 @@ public class Main extends Application {
 		// =====Create UI Elements====
 		txt = new Text("0:00:00");
 		txt.setFont(new Font(45));
-		
+
 		Button startButton = new Button("Start");
 		startButton.setFont(new Font(15));
 
 		Button resetButton = new Button("Reset");
 		resetButton.setFont(new Font(15));
-		
+
 		Button viewPrevious = new Button("View Previous Sessions");
 		viewPrevious.setFont(new Font(15));
-		
+
 		// ====Define functionality====
-		
+
 		startButton.setOnAction(a -> {
 			startClicked = !startClicked;
 			if (startClicked) {
@@ -112,7 +109,7 @@ public class Main extends Application {
 			}
 			startTask();
 		});
-		
+
 		resetButton.setOnAction(a -> {
 			startButton.setText("Start");
 			timeController.stopTime();
@@ -133,32 +130,36 @@ public class Main extends Application {
 			// Set the size for the list
 			logs.setPrefHeight(200);
 			logs.setPrefWidth(300);
-			
+
 			CheckBox enableDateRange = new CheckBox("Export from a date range");
-			
+
 			DatePicker startDate = new DatePicker();
 			startDate.setTooltip(new Tooltip("Start Date"));
 			startDate.setDisable(true);
 			startDate.setPrefWidth(100);
-			
+
 			DatePicker endDate = new DatePicker();
 			endDate.setTooltip(new Tooltip("End Date"));
 			endDate.setDisable(true);
 			endDate.setPrefWidth(100);
-			
+
 			// Add a button to export the logs
 			Button exportButton = new Button("Export Logs");
 
 			// Export Button Handler
 			exportButton.setOnAction(b -> {
-				// Implement Export Class
-				try {
-					timeController.writeToReadableFile();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+				if (enableDateRange.isSelected()) {
+					// Insert code for dated export
+				} else {
+					// Implement Export Class
+					try {
+						timeController.writeToReadableFile();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
 				}
 			});
-			
+
 			enableDateRange.setOnAction(b -> {
 				startDate.setDisable(!enableDateRange.isSelected());
 				endDate.setDisable(!enableDateRange.isSelected());
@@ -177,25 +178,24 @@ public class Main extends Application {
 
 		// ----Menu Bar---
 		/*
-		MenuBar menuBar = new MenuBar();
-		Menu menuFile = new Menu("File");
-		MenuItem newItem = new MenuItem("New Game");
-
-		menuFile.getItems().addAll(newItem);
-		menuBar.getMenus().addAll(menuFile);
-		*/
+		 * MenuBar menuBar = new MenuBar(); Menu menuFile = new Menu("File");
+		 * MenuItem newItem = new MenuItem("New Game");
+		 * 
+		 * menuFile.getItems().addAll(newItem);
+		 * menuBar.getMenus().addAll(menuFile);
+		 */
 
 		// ====Create====
-		
+
 		primaryStage.setTitle("Title");
 		VBox verticalBox = new VBox(30);
 		Scene scene = new Scene(verticalBox, 400, 400);
 		scene.setFill(Color.OLDLACE);
-		
+
 		HBox controlButtons = new HBox(40);
 		controlButtons.getChildren().addAll(startButton, resetButton);
 		controlButtons.setAlignment(Pos.CENTER);
-		
+
 		verticalBox.getChildren().addAll(txt, controlButtons, viewPrevious);
 		verticalBox.setAlignment(Pos.CENTER);
 
