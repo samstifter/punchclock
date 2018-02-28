@@ -82,8 +82,8 @@ public class Main extends Application {
 		timeController = new TimeController(timeModel, timeView);
 
 		// =====Create UI Elements====
-		txt = new Text("Test");
-		txt.setFont(new Font(40));
+		txt = new Text("0:00:00");
+		txt.setFont(new Font(45));
 		
 		Button startButton = new Button("Start");
 		startButton.setFont(new Font(15));
@@ -167,7 +167,7 @@ public class Main extends Application {
 		
 		primaryStage.setTitle("Title");
 		VBox verticalBox = new VBox(30);
-		Scene scene = new Scene(verticalBox, 300, 400);
+		Scene scene = new Scene(verticalBox, 400, 400);
 		scene.setFill(Color.OLDLACE);
 		
 		HBox controlButtons = new HBox(40);
