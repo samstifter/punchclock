@@ -5,12 +5,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -48,12 +45,27 @@ public class Main extends Application {
 	}
 
 	public void runTask() {
+		
+
+		
+		
 		while (true) {
 			try {
 				Platform.runLater(new Runnable() {
+					
+					int durationSeconds;
+					int durationMinutes;
+					int durationHours;
+					
 					@Override
 					public void run() {
-						txt.setText(Double.toString(timeController.getCurrentSessionElapsedTime() / 1000.0));
+						durationSeconds = (int)timeController.getCurrentSessionElapsedTime() / 1000;
+						durationMinutes = durationSeconds / 60;
+						durationHours = durationMinutes / 60;
+						
+						String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes, durationSeconds);
+						
+						txt.setText(durationString);
 					}
 				});
 
@@ -69,16 +81,21 @@ public class Main extends Application {
 		// =====Setup Time Components=====
 		timeController = new TimeController(timeModel, timeView);
 
-		// ====Setup====
-		primaryStage.setTitle("Title");
-		VBox verticalBox = new VBox();
-		Scene scene = new Scene(verticalBox, 300, 400);
-		scene.setFill(Color.OLDLACE);
-
+		// =====Create UI Elements====
 		txt = new Text("Test");
+		txt.setFont(new Font(40));
+		
 		Button startButton = new Button("Start");
+		startButton.setFont(new Font(15));
+
 		Button resetButton = new Button("Reset");
+		resetButton.setFont(new Font(15));
+		
 		Button viewPrevious = new Button("View Previous Sessions");
+		viewPrevious.setFont(new Font(15));
+		
+		// ====Define functionality====
+		
 		startButton.setOnAction(a -> {
 			startClicked = !startClicked;
 			if (startClicked) {
@@ -92,6 +109,7 @@ public class Main extends Application {
 			}
 			startTask();
 		});
+		
 		resetButton.setOnAction(a -> {
 			startButton.setText("Start");
 			timeController.stopTime();
@@ -135,21 +153,29 @@ public class Main extends Application {
 			previousLogWindow.show();
 		});
 
-		VBox vb = new VBox();
-		vb.getChildren().addAll(txt, startButton, resetButton, viewPrevious);
-
-		// ====Canvas====
-		Canvas canvas = new Canvas(300, 300);
-		// ====Menu====
+		// ----Menu Bar---
+		/*
 		MenuBar menuBar = new MenuBar();
 		Menu menuFile = new Menu("File");
 		MenuItem newItem = new MenuItem("New Game");
 
 		menuFile.getItems().addAll(newItem);
 		menuBar.getMenus().addAll(menuFile);
+		*/
 
 		// ====Create====
-		verticalBox.getChildren().addAll(menuBar, vb, canvas);
+		
+		primaryStage.setTitle("Title");
+		VBox verticalBox = new VBox(30);
+		Scene scene = new Scene(verticalBox, 300, 400);
+		scene.setFill(Color.OLDLACE);
+		
+		HBox controlButtons = new HBox(40);
+		controlButtons.getChildren().addAll(startButton, resetButton);
+		controlButtons.setAlignment(Pos.CENTER);
+		
+		verticalBox.getChildren().addAll(txt, controlButtons, viewPrevious);
+		verticalBox.setAlignment(Pos.CENTER);
 
 		primaryStage.setScene(scene);
 		primaryStage.show();
