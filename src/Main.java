@@ -6,7 +6,10 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -130,7 +133,19 @@ public class Main extends Application {
 			// Set the size for the list
 			logs.setPrefHeight(200);
 			logs.setPrefWidth(300);
-
+			
+			CheckBox enableDateRange = new CheckBox("Export from a date range");
+			
+			DatePicker startDate = new DatePicker();
+			startDate.setTooltip(new Tooltip("Start Date"));
+			startDate.setDisable(true);
+			startDate.setPrefWidth(100);
+			
+			DatePicker endDate = new DatePicker();
+			endDate.setTooltip(new Tooltip("End Date"));
+			endDate.setDisable(true);
+			endDate.setPrefWidth(100);
+			
 			// Add a button to export the logs
 			Button exportButton = new Button("Export Logs");
 
@@ -142,14 +157,21 @@ public class Main extends Application {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-
+			});
+			
+			enableDateRange.setOnAction(b -> {
+				startDate.setDisable(!enableDateRange.isSelected());
+				endDate.setDisable(!enableDateRange.isSelected());
 			});
 
 			// Make a layout, and add everything to it, centered
 			VBox layout = new VBox(10);
-			layout.getChildren().addAll(title, logs, exportButton);
+			HBox dates = new HBox(15);
+			dates.getChildren().addAll(startDate, endDate);
+			dates.setAlignment(Pos.CENTER);
+			layout.getChildren().addAll(title, logs, enableDateRange, dates, exportButton);
 			layout.setAlignment(Pos.CENTER);
-			previousLogWindow.setScene(new Scene(layout, 300, 300));
+			previousLogWindow.setScene(new Scene(layout, 300, 400));
 			previousLogWindow.show();
 		});
 
