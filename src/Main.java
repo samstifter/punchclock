@@ -50,19 +50,15 @@ public class Main extends Application {
 	public void runTask() {
 		while (true) {
 			try {
-			Platform.runLater(new Runnable() 
-			{
-	            @Override 
-	            public void run() 
-	            {
-	            	txt.setText(Double.toString(timeController.getCurrentSessionElapsedTime() / 1000.0));
-	            }
-	        });
-	
-			Thread.sleep(50);
-			}
-			catch (InterruptedException e) 
-			{
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						txt.setText(Double.toString(timeController.getCurrentSessionElapsedTime() / 1000.0));
+					}
+				});
+
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -76,54 +72,53 @@ public class Main extends Application {
 		// ====Setup====
 		primaryStage.setTitle("Title");
 		VBox verticalBox = new VBox();
-        Scene scene = new Scene(verticalBox, 300, 400);
-        scene.setFill(Color.OLDLACE);
+		Scene scene = new Scene(verticalBox, 300, 400);
+		scene.setFill(Color.OLDLACE);
 
-        txt = new Text("Test");
-        Button startButton = new Button("Start");
-        Button resetButton = new Button("Reset");
-        Button viewPrevious = new Button("View Previous Sessions");
-        startButton.setOnAction(a -> {
-        	startClicked = !startClicked;
-        	if(startClicked) {
-        		startButton.setText("Pause");
-	        	timeController.startTime();
-	            //timer.start();
-        	}
-        	else {
-        		startButton.setText("Start");
-        		timeController.stopTime();
-            	timeController.displayElapsedTimeInSeconds(timeModel);
-        	}
-        	startTask();
+		txt = new Text("Test");
+		Button startButton = new Button("Start");
+		Button resetButton = new Button("Reset");
+		Button viewPrevious = new Button("View Previous Sessions");
+		startButton.setOnAction(a -> {
+			startClicked = !startClicked;
+			if (startClicked) {
+				startButton.setText("Pause");
+				timeController.startTime();
+				// timer.start();
+			} else {
+				startButton.setText("Start");
+				timeController.stopTime();
+				timeController.displayElapsedTimeInSeconds(timeModel);
+			}
+			startTask();
 		});
-        resetButton.setOnAction(a -> {
-        	startButton.setText("Start");
-        	timeController.stopTime();
-        	timeController.resetTime();
-        });
+		resetButton.setOnAction(a -> {
+			startButton.setText("Start");
+			timeController.stopTime();
+			timeController.resetTime();
+		});
 
-        viewPrevious.setOnAction(a -> {
-        	Stage previousLogWindow = new Stage();
-        	previousLogWindow.setTitle("Previous Session Logs");
+		viewPrevious.setOnAction(a -> {
+			Stage previousLogWindow = new Stage();
+			previousLogWindow.setTitle("Previous Session Logs");
 
-        	// Add a text title inside the window
-        	Text title = new Text("Previous Session Logs");
-        	title.setFont(new Font(18));
+			// Add a text title inside the window
+			Text title = new Text("Previous Session Logs");
+			title.setFont(new Font(18));
 
-        	ObservableList<String> logList = FXCollections.observableArrayList(timeModel.getFormattedSessionList());
-        	ListView<String> logs = new ListView<String>(logList);
+			ObservableList<String> logList = FXCollections.observableArrayList(timeModel.getFormattedSessionList());
+			ListView<String> logs = new ListView<String>(logList);
 
-        	// Set the size for the list
-        	logs.setPrefHeight(200);
-        	logs.setPrefWidth(300);
+			// Set the size for the list
+			logs.setPrefHeight(200);
+			logs.setPrefWidth(300);
 
-        	// Add a button to export the logs
-        	Button exportButton = new Button("Export Logs");
+			// Add a button to export the logs
+			Button exportButton = new Button("Export Logs");
 
-        	//Export Button Handler
-        	exportButton.setOnAction(b -> {
-        		// Implement Export Class
+			// Export Button Handler
+			exportButton.setOnAction(b -> {
+				// Implement Export Class
 				try {
 					timeController.writeToReadableFile();
 				} catch (FileNotFoundException e) {
@@ -132,36 +127,36 @@ public class Main extends Application {
 
 			});
 
-        	// Make a layout, and add everything to it, centered
-        	VBox layout = new VBox(10);
-            layout.getChildren().addAll(title, logs, exportButton);
-            layout.setAlignment(Pos.CENTER);
-            previousLogWindow.setScene(new Scene(layout, 300, 300));
-            previousLogWindow.show();
-        });
+			// Make a layout, and add everything to it, centered
+			VBox layout = new VBox(10);
+			layout.getChildren().addAll(title, logs, exportButton);
+			layout.setAlignment(Pos.CENTER);
+			previousLogWindow.setScene(new Scene(layout, 300, 300));
+			previousLogWindow.show();
+		});
 
-        VBox vb = new VBox();
-        vb.getChildren().addAll(txt,startButton,resetButton,viewPrevious);
+		VBox vb = new VBox();
+		vb.getChildren().addAll(txt, startButton, resetButton, viewPrevious);
 
-        //====Canvas====
-        Canvas canvas = new Canvas(300,300);
-        //====Menu====
-        MenuBar menuBar = new MenuBar();
-        Menu menuFile = new Menu("File");
-        MenuItem newItem = new MenuItem("New Game");
+		// ====Canvas====
+		Canvas canvas = new Canvas(300, 300);
+		// ====Menu====
+		MenuBar menuBar = new MenuBar();
+		Menu menuFile = new Menu("File");
+		MenuItem newItem = new MenuItem("New Game");
 
-        menuFile.getItems().addAll(newItem);
-        menuBar.getMenus().addAll(menuFile);
+		menuFile.getItems().addAll(newItem);
+		menuBar.getMenus().addAll(menuFile);
 
-        //====Create====
-        verticalBox.getChildren().addAll(menuBar,vb,canvas);
+		// ====Create====
+		verticalBox.getChildren().addAll(menuBar, vb, canvas);
 
-        primaryStage.setScene(scene);
-        primaryStage.show();
+		primaryStage.setScene(scene);
+		primaryStage.show();
 	}
 
 	@Override
-	public void stop(){
-	    System.out.println("Stage is closing");
+	public void stop() {
+		System.out.println("Stage is closing");
 	}
 }
