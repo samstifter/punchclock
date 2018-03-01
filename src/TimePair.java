@@ -1,6 +1,9 @@
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 
@@ -49,6 +52,17 @@ public class TimePair {
 	public long getEndTime(){
 		return this.end;
 	}
+
+	public List getDuration() {
+		int durationSeconds = (int) this.getElapsedTime() / 1000;
+		int durationMinutes = durationSeconds / 60;
+		int durationHours = durationMinutes / 60;
+		List<Integer> durations = new ArrayList<Integer>();
+		durations.add(durationHours);
+		durations.add(durationMinutes);
+		durations.add(durationSeconds);
+		return durations;
+	}
 	
 	public String toString() {
 		
@@ -57,11 +71,9 @@ public class TimePair {
 		Date dateStart = new Date(this.start);
 		
 		// get duration and convert to seconds
-		int durationSeconds = (int)this.getElapsedTime() / 1000;
-		int durationMinutes = durationSeconds / 60;
-		int durationHours = durationMinutes / 60;
+		List<Integer> durations = getDuration();
 		
-		String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes, durationSeconds);
+		String durationString = String.format("%d:%02d:%02d", durations.get(0), durations.get(1), durations.get(2));
 		
 		return dateFormat.format(dateStart) + " - " + durationString;
 	}

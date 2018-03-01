@@ -171,6 +171,8 @@ public class TimeModel {
 		sb.append("Start Time:");
 		sb.append(",");
 		sb.append("End Time");
+		sb.append(",");
+		sb.append("Duration");
 		sb.append("\n");
 
 		for(Session session: this.sessions){
@@ -180,9 +182,13 @@ public class TimeModel {
 				DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
 				String startTime = dateFormat.format(timeBegin);
 				String endTime = dateFormat.format(timeEnd);
+				List<Integer> duration = pair.getDuration();
+				String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1), duration.get(2));
 				sb.append(startTime);
 				sb.append(",");
 				sb.append(endTime);
+				sb.append(",");
+				sb.append(durationTime);
 				sb.append("\n");
 			}
 		}
