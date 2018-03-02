@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -195,6 +196,11 @@ public class TimeModel {
 		}
 		pw.write(sb.toString());
 		pw.close();
+		try {
+			Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		return true;
 	}

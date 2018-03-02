@@ -205,9 +205,13 @@ public class Main extends Application {
 						PrintWriter pw = new PrintWriter(exportedFile);
 						pw.write(sb.toString());
 						pw.close();
+						Runtime.getRuntime().exec("explorer.exe /select," + exportedFile.getAbsolutePath());
 					} catch (FileNotFoundException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 					try {
 						exportedFile.createNewFile();
