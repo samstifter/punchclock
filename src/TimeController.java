@@ -1,8 +1,11 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 /**
  * The TimeController class is the Controller component of the MVC framework. It
@@ -162,6 +165,56 @@ public class TimeController {
 		return timeModel.writeToReadableFile();
 	}
 	
-	
+	public String[] getOpenApplications()
+	{
+
+		ArrayList<String> EnginesListFromTaskManeger = null;
+		String[] ListFromTaskManeger;
+	    String listCommand = "powershell -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
+	    try
+	    {
+	        String line;
+
+	        // since line length for powershell output is 79
+	        int outLen = 79;
+
+	        Process p = Runtime.getRuntime().exec(listCommand);
+	        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	        line = input.readLine();
+	        //System.out.println("line: " + line + "\t" + line.length());
+
+	        EnginesListFromTaskManeger = new ArrayList<String>();
+	        int i = 0;
+
+	        /*
+	         I used this outLen > 0 condition to make sure that this method will close automatically 
+	         in case of no running CMD applications and you running this from your IDE's (Eclipse, Netbeans , ......) 
+	         the powershell will not stopped so i used it. */
+	        while(line != null && outLen > 0)
+	        {
+	            //System.out.println("line: " + line + "\t" + line.length());
+
+	            line = input.readLine().trim().toLowerCase();
+	            outLen = line.length();
+
+	            EnginesListFromTaskManeger.add(i, line);
+
+	            //System.out.println(EnginesListFromTaskManeger.get(i));
+	            // EnginesListFromTaskManeger[i]=(String)input.readLine().trim();
+	            // System.out.println("EnginesListFromTaskManeger"+ EnginesListFromTaskManeger[i]);
+	            i++;
+	        }
+	        input.close();
+	    }catch(Exception err)
+	    {
+	        err.printStackTrace();
+	    }
+	    
+	    
+	    ListFromTaskManeger = new String[EnginesListFromTaskManeger.size()];
+	    ListFromTaskManeger = EnginesListFromTaskManeger.toArray(ListFromTaskManeger);
+
+	    return ListFromTaskManeger;
+	}
 	
 }

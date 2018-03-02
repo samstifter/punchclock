@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -19,8 +20,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -246,27 +251,44 @@ public class Main extends Application {
 		});
 
 		// ----Menu Bar---
-		/*
-		 * MenuBar menuBar = new MenuBar(); Menu menuFile = new Menu("File");
-		 * MenuItem newItem = new MenuItem("New Game");
-		 * 
-		 * menuFile.getItems().addAll(newItem);
-		 * menuBar.getMenus().addAll(menuFile);
-		 */
+		
+		 MenuBar menuBar = new MenuBar(); 
+		 Menu menuFile = new Menu("File");
+		 MenuItem settings = new MenuItem("Settings");
+		 settings.setOnAction(e -> {
+			 List<String> choices = new ArrayList<>();
+			 choices.add("slack");
+			 choices.add("discord");
+			 choices.add("eclipse");
+
+			 ChoiceDialog<String> dialog = new ChoiceDialog<>("slack", choices);
+			 dialog.setTitle("Auto-Timer Setup");
+			 dialog.setHeaderText("Pick which application you wish to time");
+			 dialog.setContentText("Choose application:");
+			 
+			 Optional<String> result = dialog.showAndWait();
+			 
+			 result.ifPresent(letter -> System.out.println("Your choice: " + letter));
+		 });
+		 
+		 menuFile.getItems().addAll(settings);
+		 menuBar.getMenus().addAll(menuFile);
+		 
 
 		// ====Create====
 
-		primaryStage.setTitle("Title");
+		primaryStage.setTitle("PunchClock");
 		VBox verticalBox = new VBox(30);
 		Scene scene = new Scene(verticalBox, 400, 400);
 		scene.setFill(Color.OLDLACE);
+
 
 		HBox controlButtons = new HBox(40);
 		controlButtons.getChildren().addAll(startButton, resetButton);
 		controlButtons.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(txt, controlButtons, viewPrevious);
-		verticalBox.setAlignment(Pos.CENTER);
+		verticalBox.getChildren().addAll(menuBar,txt, controlButtons, viewPrevious);
+		verticalBox.setAlignment(Pos.TOP_CENTER);
 
 		primaryStage.setScene(scene);
 		primaryStage.show();
