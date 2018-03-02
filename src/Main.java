@@ -166,7 +166,8 @@ public class Main extends Application {
 					Instant local = Instant.from(ld.atStartOfDay(ZoneId.systemDefault()));
 					Date date1 = Date.from(local);
 					long time1 = date1.getTime();
-					LocalDate ld2 = startDate.getValue();
+					LocalDate ld2 = endDate.getValue();
+					ld2 = ld2.plusDays(1);
 					Instant local2 = Instant.from(ld2.atStartOfDay(ZoneId.systemDefault()));
 					Date date2 = Date.from(local2);
 					long time2 = date2.getTime();
@@ -178,11 +179,11 @@ public class Main extends Application {
 					sb.append("End Time");
 					sb.append(",");
 					sb.append("Duration");
-					sb.append("\n");
+					sb.append("\n");//
 					for (Session session: sessions) {
 						List<TimePair> pairs = session.getTimePairList();
 						for (TimePair pair: pairs) {
-							if ((pair.getStartTime() >= time1 || pair.getStartTime() <=time2) && (pair.getEndTime() >= time1 || pair.getEndTime() <= time2)) {
+							if ((pair.getStartTime() >= time1 && pair.getStartTime() <=time2) || (pair.getEndTime() >= time1 && pair.getEndTime() <= time2)) {
 								Date timeBegin = new Date(pair.getStartTime());
 								Date timeEnd = new Date(pair.getEndTime());
 								DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
@@ -205,13 +206,9 @@ public class Main extends Application {
 						PrintWriter pw = new PrintWriter(exportedFile);
 						pw.write(sb.toString());
 						pw.close();
-						Runtime.getRuntime().exec("explorer.exe /select," + exportedFile.getAbsolutePath());
 					} catch (FileNotFoundException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
 					try {
 						exportedFile.createNewFile();
