@@ -111,6 +111,48 @@ public class TimeController {
 		out.close();
 		return true;
 	}
+	
+	/**
+	 * Writes the time pairs of the current session to a file in CSV format.
+	 * 
+	 * @return true if file is written, false otherwise.
+	 */
+	public boolean saveSessionRange() {
+		File outDir = new File("output");
+		File outFile = new File("output/userdata.csv");
+
+		List<TimePair> timePairList = timeModel.getCurrentSession().getTimePairList();
+
+		// Make the directory if it doesn't exist.
+		try {
+			outDir.mkdir();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+
+		PrintWriter out;
+		try {
+			// Initialize Printwriter, uses filewriter so lines are appended
+			// instead of overwritten.
+			out = new PrintWriter(new FileWriter(outFile, true));
+		} catch (IOException e) {
+			// If an exception with opening the file happens, return false.
+			System.err.println("Could not write file");
+			e.printStackTrace();
+			return false;
+		}
+
+		// Go through each pair of times
+		for (TimePair tp : timePairList) {
+			// Print both times, each one followed by a comma.
+			out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
+		}
+		// Add a new line at the end of the session.
+		out.print("\n");
+
+		out.close();
+		return true;
+	}
 
 	/**
 	 * @return
@@ -119,4 +161,7 @@ public class TimeController {
 	public boolean writeToReadableFile() throws FileNotFoundException {
 		return timeModel.writeToReadableFile();
 	}
+	
+	
+	
 }

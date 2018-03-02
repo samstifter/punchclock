@@ -1,4 +1,16 @@
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -150,6 +162,59 @@ public class Main extends Application {
 			exportButton.setOnAction(b -> {
 				if (enableDateRange.isSelected()) {
 					// Insert code for dated export
+					LocalDate ld = startDate.getValue();
+					Instant local = Instant.from(ld.atStartOfDay(ZoneId.systemDefault()));
+					Date date1 = Date.from(local);
+					long time1 = date1.getTime();
+					LocalDate ld2 = startDate.getValue();
+					Instant local2 = Instant.from(ld2.atStartOfDay(ZoneId.systemDefault()));
+					Date date2 = Date.from(local2);
+					long time2 = date2.getTime();
+					TimePair timeRange = new TimePair(time1, time2);
+					List<Session> sessions = timeModel.getSessions();
+					StringBuilder sb = new StringBuilder();
+					sb.append("Start Time:");
+					sb.append(",");
+					sb.append("End Time");
+					sb.append(",");
+					sb.append("Duration");
+					sb.append("\n");
+					for (Session session: sessions) {
+						List<TimePair> pairs = session.getTimePairList();
+						for (TimePair pair: pairs) {
+							if ((pair.getStartTime() >= time1 || pair.getStartTime() <=time2) && (pair.getEndTime() >= time1 || pair.getEndTime() <= time2)) {
+								Date timeBegin = new Date(pair.getStartTime());
+								Date timeEnd = new Date(pair.getEndTime());
+								DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
+								String startTime = dateFormat.format(timeBegin);
+								String endTime = dateFormat.format(timeEnd);
+								List<Integer> duration = pair.getDuration();
+								String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1), duration.get(2));
+								sb.append(startTime);
+								sb.append(",");
+								sb.append(endTime);
+								sb.append(",");
+								sb.append(durationTime);
+								sb.append("\n");
+							}
+						}
+					}
+					String dir = "output/range" + getNumberOfExportedRangeFiles() + ".csv";
+					File exportedFile = new File(dir);
+					try {
+						PrintWriter pw = new PrintWriter(exportedFile);
+						pw.write(sb.toString());
+						pw.close();
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					try {
+						exportedFile.createNewFile();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else {
 					// Implement Export Class
 					try {
@@ -201,6 +266,23 @@ public class Main extends Application {
 
 		primaryStage.setScene(scene);
 		primaryStage.show();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * 		number of range files
+	 */
+	public int getNumberOfExportedRangeFiles() {
+		File out = new File("output");
+		File[] filesInOutput = out.listFiles();
+		int count = 0;
+		for (File f: filesInOutput) {
+			if (f.getName().contains("range")) {
+				count++;
+			}
+		}
+		return ++count;
 	}
 
 	@Override

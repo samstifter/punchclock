@@ -18,7 +18,8 @@ public class TimeModel {
     private long lastStart;
     private boolean isStarted;
     private List<Session> sessions;
-    private Session currSession;
+
+	private Session currSession;
     
     /**
      * 
@@ -196,5 +197,9 @@ public class TimeModel {
 		pw.close();
 
 		return true;
+	}
+
+    public List<Session> getSessions() {
+		return sessions;
 	}
 }

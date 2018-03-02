@@ -18,6 +18,7 @@ public class Session {
 	 */
 	public Session () {
 		this.timePairList = new ArrayList<TimePair>();
+
 	}
 	
 	/**
