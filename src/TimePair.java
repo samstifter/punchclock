@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class TimePair {
 		return this.end;
 	}
 
-	public List getDuration() {
+	public List<Integer> getDuration() {
 		int durationSeconds = (int) this.getElapsedTime() / 1000;
 		int durationMinutes = durationSeconds / 60;
 		int durationHours = durationMinutes / 60;
