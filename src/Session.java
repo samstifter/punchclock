@@ -88,6 +88,10 @@ public class Session {
 	}
 	
 	public String toString() {
+		if(this.getTimePairList().isEmpty()){
+			return "Empty session";
+		}
+		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date dateStart = new Date(this.timePairList.get(0).getStartTime());
 	
