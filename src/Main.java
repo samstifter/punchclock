@@ -1,6 +1,8 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -57,15 +59,18 @@ public class Main extends Application {
 	public void startTask() {
 		Runnable task = new Runnable() {
 			public void run() {
-				runTask();
+				updateCurrentSessionVisibleTime();
 			}
 		};
 		Thread background = new Thread(task);
 		background.setDaemon(true);
 		background.start();
 	}
-
-	public void runTask() {
+	
+	/**
+	 * This is a background process that continiously updates the visible timer 
+	 */
+	public void updateCurrentSessionVisibleTime() {
 		while (true) {
 			try {
 				Platform.runLater(new Runnable() {
@@ -92,6 +97,40 @@ public class Main extends Application {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * Uses Powershell command to find a list of applications running processes that also have a visible window
+	 * @return The List of strings representing the applications running processes that also have a visible window
+	 */
+	public List<String> getEnginesFromTaskManger()
+	{
+
+		List<String> EnginesListFromTaskManeger = null;
+	    String listCommand = "powershell -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
+	    try
+	    {
+	        String line;
+	        int outLen = 79;
+	        Process p = Runtime.getRuntime().exec(listCommand);
+	        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	        line = input.readLine();
+	        EnginesListFromTaskManeger = new ArrayList<String>();
+	        int i = 0;
+	        while(line != null && outLen > 0)
+	        {
+	            line = input.readLine().trim().toLowerCase();
+	            outLen = line.length();
+	            EnginesListFromTaskManeger.add(i, line);
+	            i++;
+	        }
+	        input.close();
+	    }catch(Exception err)
+	    {
+	        err.printStackTrace();
+	    }
+	    return EnginesListFromTaskManeger;
+
 	}
 
 	@Override
