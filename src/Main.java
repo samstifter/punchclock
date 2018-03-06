@@ -21,6 +21,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -107,6 +108,11 @@ public class Main extends Application {
 
 		Button resetButton = new Button("Reset");
 		resetButton.setFont(new Font(15));
+		
+		Text applicationListTitle = new Text("Application to Track");
+		
+		ComboBox<String> applicationList = new ComboBox<String>();
+		applicationList.setPromptText("Application to Track");
 
 		Button viewPrevious = new Button("View Previous Sessions");
 		viewPrevious.setFont(new Font(15));
@@ -131,6 +137,10 @@ public class Main extends Application {
 			startButton.setText("Start");
 			timeController.stopTime();
 			timeController.resetTime();
+		});
+		
+		applicationList.setOnAction(a -> {
+			
 		});
 
 		viewPrevious.setOnAction(a -> {
@@ -286,8 +296,12 @@ public class Main extends Application {
 		HBox controlButtons = new HBox(40);
 		controlButtons.getChildren().addAll(startButton, resetButton);
 		controlButtons.setAlignment(Pos.CENTER);
+		
+		VBox applicationSelect = new VBox(3);
+		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
+		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(menuBar,txt, controlButtons, viewPrevious);
+		verticalBox.getChildren().addAll(menuBar,txt, controlButtons, applicationSelect, viewPrevious);
 		verticalBox.setAlignment(Pos.TOP_CENTER);
 
 		primaryStage.setScene(scene);
