@@ -83,9 +83,10 @@ public class Main extends Application {
 
 					@Override
 					public void run() {
-						durationSeconds = (int) timeController.getCurrentSessionElapsedTime() / 1000;
-						durationMinutes = durationSeconds / 60;
-						durationHours = durationMinutes / 60;
+						int seconds = (int)timeController.getCurrentSessionElapsedTime() / 1000;
+						durationSeconds = seconds % 60;
+						durationMinutes = (seconds / 60) % 60;
+						durationHours = (seconds / 60) / 60;
 
 						String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes,
 								durationSeconds);
