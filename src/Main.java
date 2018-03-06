@@ -50,13 +50,15 @@ public class Main extends Application {
 	private boolean startClicked = false;
 	Text txt;
 
+	private List<String> appList = new ArrayList<String>();
+
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
 		timeView = new TimeView();
 		launch(args);
 	}
 
-	public void startTask() {
+	public void startUpdateCurrentSessionVisibleTime() {
 		Runnable task = new Runnable() {
 			public void run() {
 				updateCurrentSessionVisibleTime();
@@ -66,9 +68,9 @@ public class Main extends Application {
 		background.setDaemon(true);
 		background.start();
 	}
-	
+
 	/**
-	 * This is a background process that continiously updates the visible timer 
+	 * This is a background process that continiously updates the visible timer
 	 */
 	public void updateCurrentSessionVisibleTime() {
 		while (true) {
@@ -98,39 +100,52 @@ public class Main extends Application {
 			}
 		}
 	}
-	
+
+	public void startGetAppWindows() {
+		Runnable task = new Runnable() {
+			public void run() {
+				getAppWindows();
+			}
+		};
+		Thread background = new Thread(task);
+		background.setDaemon(true);
+		background.start();
+	}
+
 	/**
-	 * Uses Powershell command to find a list of applications running processes that also have a visible window
-	 * @return The List of strings representing the applications running processes that also have a visible window
+	 * Uses Powershell command to find a list of applications running processes
+	 * that also have a visible window. Updates the appList
+	 *
 	 */
-	public List<String> getEnginesFromTaskManger()
-	{
-
-		List<String> EnginesListFromTaskManeger = null;
-	    String listCommand = "powershell -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
-	    try
-	    {
-	        String line;
-	        int outLen = 79;
-	        Process p = Runtime.getRuntime().exec(listCommand);
-	        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	        line = input.readLine();
-	        EnginesListFromTaskManeger = new ArrayList<String>();
-	        int i = 0;
-	        while(line != null && outLen > 0)
-	        {
-	            line = input.readLine().trim().toLowerCase();
-	            outLen = line.length();
-	            EnginesListFromTaskManeger.add(i, line);
-	            i++;
-	        }
-	        input.close();
-	    }catch(Exception err)
-	    {
-	        err.printStackTrace();
-	    }
-	    return EnginesListFromTaskManeger;
-
+	public void getAppWindows() {
+		while (true) {
+			List<String> fetchedList = null;
+			String listCommand = "powershell -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
+			try {
+				String line;
+				int outLen = 79;
+				Process p = Runtime.getRuntime().exec(listCommand);
+				BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				line = input.readLine();
+				line = input.readLine();
+				line = input.readLine();
+				fetchedList = new ArrayList<String>();
+				fetchedList.add("NONE");
+				while (line != null && outLen > 0) {
+					line = input.readLine().trim().toLowerCase();
+					outLen = line.length();
+					if (outLen != 0) {
+						fetchedList.add(line);
+					}
+				}
+				input.close();
+				appList = fetchedList;
+				
+				Thread.sleep(1000);
+			} catch (Exception err) {
+				err.printStackTrace();
+			}
+		}
 	}
 
 	@Override
@@ -147,11 +162,11 @@ public class Main extends Application {
 
 		Button resetButton = new Button("Reset");
 		resetButton.setFont(new Font(15));
-		
+
 		Text applicationListTitle = new Text("Application to Track");
-		
+
 		ComboBox<String> applicationList = new ComboBox<String>();
-		applicationList.setPromptText("Application to Track");
+		applicationList.setValue("NONE");
 
 		Button viewPrevious = new Button("View Previous Sessions");
 		viewPrevious.setFont(new Font(15));
@@ -169,7 +184,6 @@ public class Main extends Application {
 				timeController.stopTime();
 				timeController.displayElapsedTimeInSeconds(timeModel);
 			}
-			startTask();
 		});
 
 		resetButton.setOnAction(a -> {
@@ -177,9 +191,11 @@ public class Main extends Application {
 			timeController.stopTime();
 			timeController.resetTime();
 		});
-		
-		applicationList.setOnAction(a -> {
-			
+
+		applicationList.setOnShowing(a -> {
+			ObservableList<String> currentAppList = FXCollections
+					.observableArrayList(appList.subList(0, appList.size()));
+			applicationList.setItems(currentAppList);
 		});
 
 		viewPrevious.setOnAction(a -> {
@@ -233,17 +249,19 @@ public class Main extends Application {
 					sb.append(",");
 					sb.append("Duration");
 					sb.append("\n");
-					for (Session session: sessions) {
+					for (Session session : sessions) {
 						List<TimePair> pairs = session.getTimePairList();
-						for (TimePair pair: pairs) {
-							if ((pair.getStartTime() >= time1 || pair.getStartTime() <=time2) && (pair.getEndTime() >= time1 || pair.getEndTime() <= time2)) {
+						for (TimePair pair : pairs) {
+							if ((pair.getStartTime() >= time1 || pair.getStartTime() <= time2)
+									&& (pair.getEndTime() >= time1 || pair.getEndTime() <= time2)) {
 								Date timeBegin = new Date(pair.getStartTime());
 								Date timeEnd = new Date(pair.getEndTime());
 								DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
 								String startTime = dateFormat.format(timeBegin);
 								String endTime = dateFormat.format(timeEnd);
 								List<Integer> duration = pair.getDuration();
-								String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1), duration.get(2));
+								String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1),
+										duration.get(2));
 								sb.append(startTime);
 								sb.append(",");
 								sb.append(endTime);
@@ -300,29 +318,28 @@ public class Main extends Application {
 		});
 
 		// ----Menu Bar---
-		
-		 MenuBar menuBar = new MenuBar(); 
-		 Menu menuFile = new Menu("File");
-		 MenuItem settings = new MenuItem("Settings");
-		 settings.setOnAction(e -> {
-			 List<String> choices = new ArrayList<>();
-			 choices.add("slack");
-			 choices.add("discord");
-			 choices.add("eclipse");
 
-			 ChoiceDialog<String> dialog = new ChoiceDialog<>("slack", choices);
-			 dialog.setTitle("Auto-Timer Setup");
-			 dialog.setHeaderText("Pick which application you wish to time");
-			 dialog.setContentText("Choose application:");
-			 
-			 Optional<String> result = dialog.showAndWait();
-			 
-			 result.ifPresent(letter -> System.out.println("Your choice: " + letter));
-		 });
-		 
-		 menuFile.getItems().addAll(settings);
-		 menuBar.getMenus().addAll(menuFile);
-		 
+		MenuBar menuBar = new MenuBar();
+		Menu menuFile = new Menu("File");
+		MenuItem settings = new MenuItem("Settings");
+		settings.setOnAction(e -> {
+			List<String> choices = new ArrayList<>();
+			choices.add("slack");
+			choices.add("discord");
+			choices.add("eclipse");
+
+			ChoiceDialog<String> dialog = new ChoiceDialog<>("slack", choices);
+			dialog.setTitle("Auto-Timer Setup");
+			dialog.setHeaderText("Pick which application you wish to time");
+			dialog.setContentText("Choose application:");
+
+			Optional<String> result = dialog.showAndWait();
+
+			result.ifPresent(letter -> System.out.println("Your choice: " + letter));
+		});
+
+		menuFile.getItems().addAll(settings);
+		menuBar.getMenus().addAll(menuFile);
 
 		// ====Create====
 
@@ -331,32 +348,34 @@ public class Main extends Application {
 		Scene scene = new Scene(verticalBox, 400, 400);
 		scene.setFill(Color.OLDLACE);
 
-
 		HBox controlButtons = new HBox(40);
 		controlButtons.getChildren().addAll(startButton, resetButton);
 		controlButtons.setAlignment(Pos.CENTER);
-		
+
 		VBox applicationSelect = new VBox(3);
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(menuBar,txt, controlButtons, applicationSelect, viewPrevious);
+		verticalBox.getChildren().addAll(menuBar, txt, controlButtons, applicationSelect, viewPrevious);
 		verticalBox.setAlignment(Pos.TOP_CENTER);
+		
+		// ====Start Background Threads====
+		startUpdateCurrentSessionVisibleTime();
+		startGetAppWindows();
 
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
-	
+
 	/**
 	 * 
-	 * @return
-	 * 		number of range files
+	 * @return number of range files
 	 */
 	public int getNumberOfExportedRangeFiles() {
 		File out = new File("output");
 		File[] filesInOutput = out.listFiles();
 		int count = 0;
-		for (File f: filesInOutput) {
+		for (File f : filesInOutput) {
 			if (f.getName().contains("range")) {
 				count++;
 			}
