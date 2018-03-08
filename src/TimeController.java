@@ -51,7 +51,7 @@ public class TimeController {
 	 */
 	public void resetTime() {
 		timeModel.stopTime();
-		this.saveCurrentSession();
+		this.saveSessions();
 		timeModel.resetTime();
 	}
 
@@ -75,22 +75,23 @@ public class TimeController {
 	}
 
 	public boolean editSession(int index, long newDurationMillis) {
-		//
-		timeModel.getSessions().get(index).getTimePairList();
-		List<TimePair> list = new ArrayList<TimePair>();
-		long startTime = timeModel.getSessions().get(index).getTimePairList().get(0).getStartTime();
-		long endTime = startTime + newDurationMillis;
-		list.removeAll(list);
-		list.add(new TimePair(startTime, endTime));
-		timeModel.getSessions().get(index).setTimePairList(list);
+		try {
+			timeModel.getSessions().get(index).getTimePairList();
+			List<TimePair> list = new ArrayList<TimePair>();
+			long startTime = timeModel.getSessions().get(index).getTimePairList().get(0).getStartTime();
+			long endTime = startTime + newDurationMillis;
+			list.add(new TimePair(startTime, endTime));
+			timeModel.getSessions().get(index).setTimePairList(list);
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		}
 		return true;
 	}
 
 	public boolean deleteSession(int index) {
-		try{
+		try {
 			timeModel.getSessions().remove(index);
-		}
-		catch(IndexOutOfBoundsException e){
+		} catch (IndexOutOfBoundsException e) {
 			return false;
 		}
 		return true;
@@ -101,12 +102,11 @@ public class TimeController {
 	 * 
 	 * @return true if file is written, false otherwise.
 	 */
-	public boolean saveCurrentSession() {
+	public boolean saveSessions() {
 		File outDir = new File("output");
 		File outFile = new File("output/userdata.csv");
 
-		// TODO Get the session list instead of the time pair list
-		List<TimePair> timePairList = timeModel.getCurrentSession().getTimePairList();
+		List<Session> sessionList = timeModel.getSessions();
 
 		// Make the directory if it doesn't exist.
 		try {
@@ -117,11 +117,7 @@ public class TimeController {
 
 		PrintWriter out;
 		try {
-			// Initialize Printwriter, uses filewriter so lines are appended
-			// instead of overwritten.
-			out = new PrintWriter(new FileWriter(outFile, true)); // TODO remove
-																	// the file
-																	// writer
+			out = new PrintWriter(outFile); 
 		} catch (IOException e) {
 			// If an exception with opening the file happens, return false.
 			System.err.println("Could not write file");
@@ -129,19 +125,17 @@ public class TimeController {
 			return false;
 		}
 
-		// TODO Put this into a for loop. For each session in the session list
+		for (Session session : sessionList) {
 
-		// Go through each pair of times
-		for (TimePair tp : timePairList) { // TODO change this to
-											// session.getTimePairList()
-			// Print both times, each one followed by a comma.
-			out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
+			// Go through each pair of times
+			for (TimePair tp : session.getTimePairList()) {
+				// Print both times, each one followed by a comma.
+				out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
+			}
+			// Add a new line at the end of the session.
+			out.print("\n");
+
 		}
-		// Add a new line at the end of the session.
-		out.print("\n");
-
-		// END the Session for loop here
-
 		out.close();
 		return true;
 	}
