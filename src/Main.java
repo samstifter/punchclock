@@ -357,29 +357,6 @@ public class Main extends Application {
 			previousLogWindow.show();
 		});
 
-		// ----Menu Bar---
-
-		MenuBar menuBar = new MenuBar();
-		Menu menuFile = new Menu("File");
-		MenuItem settings = new MenuItem("Settings");
-		settings.setOnAction(e -> {
-			List<String> choices = new ArrayList<>();
-			choices.add("slack");
-			choices.add("discord");
-			choices.add("eclipse");
-
-			ChoiceDialog<String> dialog = new ChoiceDialog<>("slack", choices);
-			dialog.setTitle("Auto-Timer Setup");
-			dialog.setHeaderText("Pick which application you wish to time");
-			dialog.setContentText("Choose application:");
-
-			Optional<String> result = dialog.showAndWait();
-
-			result.ifPresent(letter -> System.out.println("Your choice: " + letter));
-		});
-
-		menuFile.getItems().addAll(settings);
-		menuBar.getMenus().addAll(menuFile);
 
 		// ====Create====
 
@@ -396,8 +373,8 @@ public class Main extends Application {
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(menuBar, txt, controlButtons, applicationSelect, viewPrevious);
-		verticalBox.setAlignment(Pos.TOP_CENTER);
+		verticalBox.getChildren().addAll(txt, controlButtons, applicationSelect, viewPrevious);
+		verticalBox.setAlignment(Pos.CENTER);
 
 		// ====Start Background Threads====
 		startUpdateCurrentSessionVisibleTime();
