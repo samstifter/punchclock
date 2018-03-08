@@ -26,8 +26,8 @@ public class TimeController {
 	/**
 	 * Starts the timer by recording the current time
 	 */
-	public void startTime() {
-		timeModel.startTime();
+	public boolean startTime() {
+		return timeModel.startTime();
 	}
 
 	/**

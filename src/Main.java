@@ -2,8 +2,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -12,13 +10,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tooltip;
@@ -45,6 +39,8 @@ public class Main extends Application {
 	Text txt;
 
 	private List<String> appList = new ArrayList<String>();
+
+	private String trackingApp = "NONE";
 
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
@@ -136,9 +132,25 @@ public class Main extends Application {
 				input.close();
 				appList = fetchedList;
 
-				Thread.sleep(1000);
+				
 			} catch (Exception err) {
 				err.printStackTrace();
+			}
+			
+			if(!appList.contains(trackingApp)){
+				timeController.stopTime();
+				//startClicked = false;
+			} else {
+				if(trackingApp != null && !trackingApp.equals("NONE")){
+					//startClicked = true;
+					timeController.startTime();
+				}
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -170,7 +182,7 @@ public class Main extends Application {
 
 		startButton.setOnAction(a -> {
 			startClicked = !startClicked;
-			if (startClicked) {
+			if (startClicked && appList.contains(trackingApp)) {
 				startButton.setText("Pause");
 				timeController.startTime();
 				// timer.start();
@@ -191,6 +203,10 @@ public class Main extends Application {
 			ObservableList<String> currentAppList = FXCollections
 					.observableArrayList(appList.subList(0, appList.size()));
 			applicationList.setItems(currentAppList);
+		});
+
+		applicationList.setOnAction(a -> {
+			trackingApp = applicationList.getValue();
 		});
 
 		viewPrevious.setOnAction(a -> {
@@ -234,7 +250,8 @@ public class Main extends Application {
 				if (logs.getSelectionModel().getSelectedItem() != null) {
 					editButton.setDisable(false);
 					deleteButton.setDisable(false);
-					// DEBUG System.out.println(logs.getSelectionModel().getSelectedIndex());
+					// DEBUG
+					// System.out.println(logs.getSelectionModel().getSelectedIndex());
 				}
 			});
 
@@ -269,10 +286,10 @@ public class Main extends Application {
 
 				Spinner<Integer> hourSpinner = new Spinner<Integer>(hourValueFactory);
 				hourSpinner.setPrefWidth(50);
-				
+
 				Spinner<Integer> minuteSpinner = new Spinner<Integer>(minuteValueFactory);
 				minuteSpinner.setPrefWidth(50);
-				
+
 				Spinner<Integer> secondSpinner = new Spinner<Integer>(secondValueFactory);
 				secondSpinner.setPrefWidth(50);
 
@@ -297,11 +314,11 @@ public class Main extends Application {
 				// setting up the layout for editLogWindow
 				VBox layout = new VBox(35);
 				layout.setAlignment(Pos.CENTER);
-				
+
 				GridPane spinners = new GridPane();
 				spinners.setAlignment(Pos.CENTER);
 				spinners.setHgap(25);
-				
+
 				spinners.add(hoursTitle, 0, 0);
 				spinners.add(minutesTitle, 1, 0);
 				spinners.add(secondsTitle, 2, 0);
@@ -356,7 +373,6 @@ public class Main extends Application {
 			previousLogWindow.setScene(new Scene(layout, 300, 400));
 			previousLogWindow.show();
 		});
-
 
 		// ====Create====
 

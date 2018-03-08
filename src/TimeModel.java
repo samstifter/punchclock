@@ -61,9 +61,14 @@ public class TimeModel {
 	/**
 	 * Starts the timer by recording the current time
 	 */
-	public void startTime() {
-		this.lastStart = System.currentTimeMillis();
-		this.isStarted = true;
+	public boolean startTime() {
+		if (!isStarted) {
+			this.lastStart = System.currentTimeMillis();
+			this.isStarted = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -184,7 +189,7 @@ public class TimeModel {
 
 		PrintWriter out;
 		try {
-			out = new PrintWriter(outFile); 
+			out = new PrintWriter(outFile);
 		} catch (IOException e) {
 			// If an exception with opening the file happens, return false.
 			System.err.println("Could not write file");
@@ -206,7 +211,7 @@ public class TimeModel {
 		out.close();
 		return true;
 	}
-	
+
 	public boolean writeToReadableFile() {
 		File outDir = new File("output");
 		File outFile = new File("output/UserLogs.csv");
@@ -313,7 +318,7 @@ public class TimeModel {
 			e.printStackTrace();
 			return false;
 		}
-		
+
 		try {
 			Runtime.getRuntime().exec("explorer.exe /select," + exportedFile.getAbsolutePath());
 		} catch (IOException e) {
