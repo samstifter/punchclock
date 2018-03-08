@@ -53,9 +53,10 @@ public class TimePair {
 	}
 
 	public List<Integer> getDuration() {
-		int durationSeconds = (int) this.getElapsedTime() / 1000;
-		int durationMinutes = durationSeconds / 60;
-		int durationHours = durationMinutes / 60;
+		int seconds = (int) this.getElapsedTime() / 1000;
+		int durationSeconds = seconds % 60;
+		int durationMinutes = (seconds / 60) % 60;
+		int durationHours = (seconds / 60) / 60;
 		List<Integer> durations = new ArrayList<Integer>();
 		durations.add(durationHours);
 		durations.add(durationMinutes);
