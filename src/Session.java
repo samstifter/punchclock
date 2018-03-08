@@ -104,4 +104,17 @@ public class Session {
 		
 		return dateFormat.format(dateStart) + " - " + durationString;
 		}
+	
+	public List<Integer> getDuration() {
+		List<Integer> durations = new ArrayList<Integer>();
+		for (TimePair tp: this.getTimePairList()){
+			int durationSeconds = (int) tp.getElapsedTime() / 1000;
+			int durationMinutes = durationSeconds / 60;
+			int durationHours = durationMinutes / 60;
+			durations.add(durationHours);
+			durations.add(durationMinutes);
+			durations.add(durationSeconds);
+		}
+		return durations;
+	}
 }

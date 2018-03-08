@@ -19,6 +19,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -29,6 +30,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -83,7 +85,7 @@ public class Main extends Application {
 
 					@Override
 					public void run() {
-						int seconds = (int)timeController.getCurrentSessionElapsedTime() / 1000;
+						int seconds = (int) timeController.getCurrentSessionElapsedTime() / 1000;
 						durationSeconds = seconds % 60;
 						durationMinutes = (seconds / 60) % 60;
 						durationHours = (seconds / 60) / 60;
@@ -213,6 +215,77 @@ public class Main extends Application {
 			// Set the size for the list
 			logs.setPrefHeight(200);
 			logs.setPrefWidth(300);
+			
+			Button editButton = new Button("Edit");
+			editButton.setDisable(true);
+			//edit button handler
+			editButton.setOnAction(b-> {
+				Stage editLogWindow = new Stage();
+				editLogWindow.setTitle("Edit Session");
+				
+				Text editTitle = new Text("Edit Session");
+				editTitle.setFont(new Font(18));
+				
+				Text hoursTitle = new Text("Hours");
+				Text minutesTitle = new Text("Minutes");
+				Text secondsTitle = new Text("Seconds");
+				
+				//creating spinners
+				Spinner<Integer> hourSpinner = new Spinner<Integer>(0, 24, 0, 1);
+				Spinner<Integer> minuteSpinner = new Spinner<Integer>(0, 60, 0, 1);
+				Spinner<Integer> secondSpinner = new Spinner<Integer>(0, 60, 0, 1);
+				
+				hourSpinner.setEditable(true);
+				minuteSpinner.setEditable(true);
+				secondSpinner.setEditable(true);
+			
+				Button confirmEdit = new Button("Confirm Edit");
+				confirmEdit.setOnAction(c -> {
+					
+					long newDuration = hourSpinner.getValue() *3600000 
+									 + minuteSpinner.getValue() * 60000
+									 + secondSpinner.getValue() * 1000;
+					
+					//debug
+					System.out.println("XD");
+
+					System.out.println(hourSpinner.getValueFactory().getValue());
+					System.out.println(minuteSpinner.getValueFactory().getValue());
+					System.out.println(secondSpinner.getValueFactory().getValue());
+					
+					timeController.editSession(logs.getSelectionModel().getSelectedIndex(), newDuration);
+					editLogWindow.close();
+				});
+				
+				
+				//setting up the layout
+				VBox layout = new VBox(15);
+				
+				HBox spinnerText = new HBox(10);
+				spinnerText.getChildren().addAll(hoursTitle, minutesTitle, secondsTitle);
+				spinnerText.setAlignment(Pos.CENTER);
+				
+				HBox spinners = new HBox(10);
+				spinners.getChildren().addAll(hourSpinner, minuteSpinner, secondSpinner);
+				spinners.setAlignment(Pos.CENTER);
+				
+				layout.getChildren().addAll(spinners, spinnerText, confirmEdit);
+				
+				//starting up the scene
+				editLogWindow.setScene(new Scene(layout, 300, 400));
+				editLogWindow.show();
+
+			});
+			
+			// Delete button
+			Button deleteButton = new Button("Delete");
+			deleteButton.setDisable(true);
+			//delete button handler
+			deleteButton.setOnAction(b -> {
+				int logIndex = (logs.getSelectionModel().getSelectedIndex());
+				timeController.deleteSession(logIndex);
+				
+			});
 
 			CheckBox enableDateRange = new CheckBox("Export from a date range");
 
@@ -228,6 +301,16 @@ public class Main extends Application {
 
 			// Add a button to export the logs
 			Button exportButton = new Button("Export Logs");
+
+			// TODO change this to open a new window with three spinners for
+			// hour minute second
+			logs.setOnMouseClicked(b -> {
+				if (logs.getSelectionModel().getSelectedItem() != null) {
+					editButton.setDisable(false);
+					deleteButton.setDisable(false);
+					System.out.println(logs.getSelectionModel().getSelectedIndex());
+				}
+			});
 
 			// Export Button Handler
 			exportButton.setOnAction(b -> {
@@ -251,10 +334,11 @@ public class Main extends Application {
 					sb.append(",");
 					sb.append("Duration");
 					sb.append("\n");//
-					for (Session session: sessions) {
+					for (Session session : sessions) {
 						List<TimePair> pairs = session.getTimePairList();
-						for (TimePair pair: pairs) {
-							if ((pair.getStartTime() >= time1 && pair.getStartTime() <=time2) || (pair.getEndTime() >= time1 && pair.getEndTime() <= time2)) {
+						for (TimePair pair : pairs) {
+							if ((pair.getStartTime() >= time1 && pair.getStartTime() <= time2)
+									|| (pair.getEndTime() >= time1 && pair.getEndTime() <= time2)) {
 								Date timeBegin = new Date(pair.getStartTime());
 								Date timeEnd = new Date(pair.getEndTime());
 								DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
@@ -306,9 +390,12 @@ public class Main extends Application {
 			// Make a layout, and add everything to it, centered
 			VBox layout = new VBox(10);
 			HBox dates = new HBox(15);
+			HBox deleteEditButtons = new HBox(15);
+			deleteEditButtons.getChildren().addAll(deleteButton, editButton);
+			deleteEditButtons.setAlignment(Pos.CENTER);
 			dates.getChildren().addAll(startDate, endDate);
 			dates.setAlignment(Pos.CENTER);
-			layout.getChildren().addAll(title, logs, enableDateRange, dates, exportButton);
+			layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton);
 			layout.setAlignment(Pos.CENTER);
 			previousLogWindow.setScene(new Scene(layout, 300, 400));
 			previousLogWindow.show();
