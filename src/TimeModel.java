@@ -142,7 +142,7 @@ public class TimeModel {
 		String[] times;
 		for (String session : sessions) {
 			times = session.split(",");
-			System.out.println(times[0].isEmpty());
+			// DEBUG System.out.println(times[0].isEmpty());
 			if ((times.length % 2) != 0 && !times[0].isEmpty()) {
 				System.err.println("File Data Incorrect");
 				return false;

@@ -234,7 +234,7 @@ public class Main extends Application {
 				if (logs.getSelectionModel().getSelectedItem() != null) {
 					editButton.setDisable(false);
 					deleteButton.setDisable(false);
-					System.out.println(logs.getSelectionModel().getSelectedIndex());
+					// DEBUG System.out.println(logs.getSelectionModel().getSelectedIndex());
 				}
 			});
 
