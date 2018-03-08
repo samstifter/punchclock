@@ -411,9 +411,4 @@ public class Main extends Application {
 			Platform.exit();
 		});
 	}
-
-	@Override
-	public void stop() {
-		System.out.println("Stage is closing");
-	}
 }
