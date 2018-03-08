@@ -10,18 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -146,7 +135,7 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		// =====Setup Time Components=====
-		timeController = new TimeController(timeModel, timeView);
+		timeController = new TimeController(timeModel, timeView, "");
 
 		// =====Create UI Elements====
 		txt = new Text("0:00:00");
@@ -159,12 +148,17 @@ public class Main extends Application {
 		resetButton.setFont(new Font(15));
 
 		Text applicationListTitle = new Text("Application to Track");
+		Text logNameTitle = new Text("Set Session Name");
 
 		ComboBox<String> applicationList = new ComboBox<String>();
 		applicationList.setValue("NONE");
 
 		Button viewPrevious = new Button("View Previous Sessions");
 		viewPrevious.setFont(new Font(15));
+
+		TextArea sessionName = new TextArea();
+		sessionName.setPrefSize(150, 5);
+		sessionName.setPrefRowCount(1);
 
 		// ====Define functionality====
 
@@ -185,6 +179,7 @@ public class Main extends Application {
 			startButton.setText("Start");
 			timeController.stopTime();
 			timeController.resetTime();
+			timeController.setSessionName(sessionName.getText());
 		});
 
 		applicationList.setOnShowing(a -> {
@@ -369,11 +364,15 @@ public class Main extends Application {
 		controlButtons.getChildren().addAll(startButton, resetButton);
 		controlButtons.setAlignment(Pos.CENTER);
 
+		HBox logNames = new HBox(10);
+		logNames.getChildren().addAll(logNameTitle, sessionName);
+		logNames.setAlignment(Pos.CENTER);
+
 		VBox applicationSelect = new VBox(3);
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(txt, controlButtons, applicationSelect, viewPrevious);
+		verticalBox.getChildren().addAll(txt, logNames, controlButtons, applicationSelect, viewPrevious);
 		verticalBox.setAlignment(Pos.CENTER);
 
 		// ====Start Background Threads====

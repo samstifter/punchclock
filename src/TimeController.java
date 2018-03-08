@@ -13,14 +13,16 @@ import java.util.List;
 public class TimeController {
 	private TimeModel timeModel;
 	private TimeView timeView;
+	private String sessionName;
 
 	/**
 	 * @param timeModel
 	 * @param timeView
 	 */
-	public TimeController(TimeModel timeModel, TimeView timeView) {
+	public TimeController(TimeModel timeModel, TimeView timeView, String sessionName) {
 		this.timeModel = timeModel;
 		this.timeView = timeView;
+		this.sessionName = sessionName;
 	}
 
 	/**
@@ -37,6 +39,10 @@ public class TimeController {
 	 */
 	public boolean stopTime() {
 		return timeModel.stopTime();
+	}
+
+	public void setSessionName(String sessionName) {
+		this.sessionName = sessionName;
 	}
 
 	/**
