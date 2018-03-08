@@ -31,12 +31,15 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -215,77 +218,13 @@ public class Main extends Application {
 			// Set the size for the list
 			logs.setPrefHeight(200);
 			logs.setPrefWidth(300);
-			
+
 			Button editButton = new Button("Edit");
 			editButton.setDisable(true);
-			//edit button handler
-			editButton.setOnAction(b-> {
-				Stage editLogWindow = new Stage();
-				editLogWindow.setTitle("Edit Session");
-				
-				Text editTitle = new Text("Edit Session");
-				editTitle.setFont(new Font(18));
-				
-				Text hoursTitle = new Text("Hours");
-				Text minutesTitle = new Text("Minutes");
-				Text secondsTitle = new Text("Seconds");
-				
-				//creating spinners
-				Spinner<Integer> hourSpinner = new Spinner<Integer>(0, 24, 0, 1);
-				Spinner<Integer> minuteSpinner = new Spinner<Integer>(0, 60, 0, 1);
-				Spinner<Integer> secondSpinner = new Spinner<Integer>(0, 60, 0, 1);
-				
-				hourSpinner.setEditable(true);
-				minuteSpinner.setEditable(true);
-				secondSpinner.setEditable(true);
-			
-				Button confirmEdit = new Button("Confirm Edit");
-				confirmEdit.setOnAction(c -> {
-					
-					long newDuration = hourSpinner.getValue() *3600000 
-									 + minuteSpinner.getValue() * 60000
-									 + secondSpinner.getValue() * 1000;
-					
-					//debug
-					System.out.println("XD");
 
-					System.out.println(hourSpinner.getValueFactory().getValue());
-					System.out.println(minuteSpinner.getValueFactory().getValue());
-					System.out.println(secondSpinner.getValueFactory().getValue());
-					
-					timeController.editSession(logs.getSelectionModel().getSelectedIndex(), newDuration);
-					editLogWindow.close();
-				});
-				
-				
-				//setting up the layout
-				VBox layout = new VBox(15);
-				
-				HBox spinnerText = new HBox(10);
-				spinnerText.getChildren().addAll(hoursTitle, minutesTitle, secondsTitle);
-				spinnerText.setAlignment(Pos.CENTER);
-				
-				HBox spinners = new HBox(10);
-				spinners.getChildren().addAll(hourSpinner, minuteSpinner, secondSpinner);
-				spinners.setAlignment(Pos.CENTER);
-				
-				layout.getChildren().addAll(spinners, spinnerText, confirmEdit);
-				
-				//starting up the scene
-				editLogWindow.setScene(new Scene(layout, 300, 400));
-				editLogWindow.show();
-
-			});
-			
 			// Delete button
 			Button deleteButton = new Button("Delete");
 			deleteButton.setDisable(true);
-			//delete button handler
-			deleteButton.setOnAction(b -> {
-				int logIndex = (logs.getSelectionModel().getSelectedIndex());
-				timeController.deleteSession(logIndex);
-				
-			});
 
 			CheckBox enableDateRange = new CheckBox("Export from a date range");
 
@@ -302,14 +241,102 @@ public class Main extends Application {
 			// Add a button to export the logs
 			Button exportButton = new Button("Export Logs");
 
-			// TODO change this to open a new window with three spinners for
-			// hour minute second
 			logs.setOnMouseClicked(b -> {
 				if (logs.getSelectionModel().getSelectedItem() != null) {
 					editButton.setDisable(false);
 					deleteButton.setDisable(false);
 					System.out.println(logs.getSelectionModel().getSelectedIndex());
 				}
+			});
+
+			// edit button handler
+			editButton.setOnAction(b -> {
+				Stage editLogWindow = new Stage();
+				editLogWindow.setTitle("Edit Session");
+				editLogWindow.initModality(Modality.APPLICATION_MODAL);
+
+				Text editTitle = new Text("Edit Session");
+				editTitle.setFont(new Font(18));
+
+				Text hoursTitle = new Text("Hours");
+				Text minutesTitle = new Text("Minutes");
+				Text secondsTitle = new Text("Seconds");
+
+				Session editingSession = timeModel.getSessions().get(logs.getSelectionModel().getSelectedIndex());
+				int initialSeconds = editingSession.getDuration().get(2);
+				int initialMinutes = editingSession.getDuration().get(1);
+				int initialHours = editingSession.getDuration().get(0);
+
+				// creating spinners
+				SpinnerValueFactory<Integer> hourValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0,
+						23, initialHours);
+				hourValueFactory.setWrapAround(true);
+				SpinnerValueFactory<Integer> minuteValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0,
+						59, initialMinutes);
+				minuteValueFactory.setWrapAround(true);
+				SpinnerValueFactory<Integer> secondValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0,
+						59, initialSeconds);
+				secondValueFactory.setWrapAround(true);
+
+				Spinner<Integer> hourSpinner = new Spinner<Integer>(hourValueFactory);
+				hourSpinner.setPrefWidth(50);
+				
+				Spinner<Integer> minuteSpinner = new Spinner<Integer>(minuteValueFactory);
+				minuteSpinner.setPrefWidth(50);
+				
+				Spinner<Integer> secondSpinner = new Spinner<Integer>(secondValueFactory);
+				secondSpinner.setPrefWidth(50);
+
+				// confirm button and its handler
+				Button confirmEdit = new Button("Confirm Edit");
+
+				confirmEdit.setOnAction(c -> {
+
+					long newDuration = hourSpinner.getValue() * 3600000 + minuteSpinner.getValue() * 60000
+							+ secondSpinner.getValue() * 1000;
+
+					timeController.editSession(logs.getSelectionModel().getSelectedIndex(), newDuration);
+					timeController.saveSessions();
+
+					logs.setItems(FXCollections.observableArrayList(timeModel.getFormattedSessionList()));
+					deleteButton.setDisable(true);
+					editButton.setDisable(true);
+					timeController.saveSessions();
+					editLogWindow.close();
+				});
+
+				// setting up the layout for editLogWindow
+				VBox layout = new VBox(35);
+				layout.setAlignment(Pos.CENTER);
+				
+				GridPane spinners = new GridPane();
+				spinners.setAlignment(Pos.CENTER);
+				spinners.setHgap(25);
+				
+				spinners.add(hoursTitle, 0, 0);
+				spinners.add(minutesTitle, 1, 0);
+				spinners.add(secondsTitle, 2, 0);
+				spinners.add(hourSpinner, 0, 1);
+				spinners.add(minuteSpinner, 1, 1);
+				spinners.add(secondSpinner, 2, 1);
+
+				layout.getChildren().addAll(editTitle, spinners, confirmEdit);
+
+				// starting up the scene
+				editLogWindow.setScene(new Scene(layout, 300, 200));
+				editLogWindow.setResizable(false);
+				editLogWindow.show();
+
+			});
+
+			// delete button handler
+			deleteButton.setOnAction(b -> {
+				int logIndex = (logs.getSelectionModel().getSelectedIndex());
+				timeController.deleteSession(logIndex);
+				logs.setItems(FXCollections.observableArrayList(timeModel.getFormattedSessionList()));
+				deleteButton.setDisable(true);
+				editButton.setDisable(true);
+				timeController.saveSessions();
 			});
 
 			// Export Button Handler
@@ -449,6 +476,11 @@ public class Main extends Application {
 
 		primaryStage.setScene(scene);
 		primaryStage.show();
+
+		// Close all other windows when primary stage gets closed.
+		primaryStage.setOnCloseRequest(a -> {
+			Platform.exit();
+		});
 	}
 
 	/**
