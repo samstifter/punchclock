@@ -51,8 +51,8 @@ public class TimeController {
 	 */
 	public void resetTime() {
 		timeModel.stopTime();
-		this.saveSessions();
 		timeModel.resetTime();
+		this.saveSessions();
 	}
 
 	/**
