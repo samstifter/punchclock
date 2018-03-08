@@ -313,6 +313,13 @@ public class TimeModel {
 			e.printStackTrace();
 			return false;
 		}
+		
+		try {
+			Runtime.getRuntime().exec("explorer.exe /select," + exportedFile.getAbsolutePath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		return true;
 	}
 
