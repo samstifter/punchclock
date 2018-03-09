@@ -156,9 +156,8 @@ public class Main extends Application {
 		Button viewPrevious = new Button("View Previous Sessions");
 		viewPrevious.setFont(new Font(15));
 
-		TextArea sessionName = new TextArea();
+		TextField sessionName = new TextField();
 		sessionName.setPrefSize(150, 5);
-		sessionName.setPrefRowCount(1);
 
 		// ====Define functionality====
 
@@ -166,12 +165,14 @@ public class Main extends Application {
 			startClicked = !startClicked;
 			if (startClicked) {
 				startButton.setText("Pause");
+				timeController.setSessionName(sessionName.getText());
 				timeController.startTime();
 				// timer.start();
 			} else {
 				startButton.setText("Start");
 				timeController.stopTime();
 				timeController.displayElapsedTimeInSeconds(timeModel);
+				timeController.setSessionName(sessionName.getText());
 			}
 		});
 

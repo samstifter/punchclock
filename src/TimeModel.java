@@ -61,9 +61,10 @@ public class TimeModel {
 	/**
 	 * Starts the timer by recording the current time
 	 */
-	public void startTime() {
+	public void startTime(String sessionName) {
 		this.lastStart = System.currentTimeMillis();
 		this.isStarted = true;
+		currSession.setSessionName(sessionName);
 	}
 
 	/**
@@ -123,6 +124,7 @@ public class TimeModel {
 	 * @return
 	 */
 	private boolean loadSavedSessions() {
+		System.out.println("scrum slut:");
 		File saveFile = new File("output/userdata.csv");
 
 		Scanner key;
@@ -143,7 +145,7 @@ public class TimeModel {
 		for (String session : sessions) {
 			times = session.split(",");
 			// DEBUG System.out.println(times[0].isEmpty());
-			if ((times.length % 2) != 0 && !times[0].isEmpty()) {
+			if ((times.length % 3) != 0 && !times[0].isEmpty()) {
 				System.err.println("File Data Incorrect");
 				return false;
 			}
@@ -154,10 +156,11 @@ public class TimeModel {
 			Session session = new Session();
 			times = line.split(",");
 			if (!times[0].isEmpty()) {
-				for (int i = 0; i < times.length - 1; i += 2) {
+				for (int i = 1; i < times.length - 1; i += 2) {
 					TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
 					session.addTimePair(tp);
 				}
+				session.setSessionName(times[0]);
 				this.addSession(session);
 			}
 		}
@@ -184,7 +187,7 @@ public class TimeModel {
 
 		PrintWriter out;
 		try {
-			out = new PrintWriter(outFile); 
+			out = new PrintWriter(outFile);
 		} catch (IOException e) {
 			// If an exception with opening the file happens, return false.
 			System.err.println("Could not write file");
@@ -197,7 +200,7 @@ public class TimeModel {
 			// Go through each pair of times
 			for (TimePair tp : session.getTimePairList()) {
 				// Print both times, each one followed by a comma.
-				out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
+				out.printf("%s,%d,%d,", session.getSessionName(), tp.getStartTime(), tp.getEndTime());
 			}
 			// Add a new line at the end of the session.
 			out.print("\n");
@@ -227,6 +230,8 @@ public class TimeModel {
 			return false;
 		}
 		StringBuilder sb = new StringBuilder();
+		sb.append("Session Name:");
+		sb.append(",");
 		sb.append("Start Time:");
 		sb.append(",");
 		sb.append("End Time");
@@ -243,6 +248,8 @@ public class TimeModel {
 				String endTime = dateFormat.format(timeEnd);
 				List<Integer> duration = pair.getDuration();
 				String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1), duration.get(2));
+				sb.append(session.getSessionName());
+				sb.append(",");
 				sb.append(startTime);
 				sb.append(",");
 				sb.append(endTime);
@@ -275,6 +282,8 @@ public class TimeModel {
 
 		List<Session> sessions = this.getSessions();
 		StringBuilder sb = new StringBuilder();
+		sb.append("Session Name:");
+		sb.append(",");
 		sb.append("Start Time:");
 		sb.append(",");
 		sb.append("End Time");
@@ -294,6 +303,8 @@ public class TimeModel {
 					List<Integer> duration = pair.getDuration();
 					String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1),
 							duration.get(2));
+					sb.append(session.getSessionName());
+					sb.append(",");
 					sb.append(startTime);
 					sb.append(",");
 					sb.append(endTime);

@@ -29,7 +29,7 @@ public class TimeController {
 	 * Starts the timer by recording the current time
 	 */
 	public void startTime() {
-		timeModel.startTime();
+		timeModel.startTime(sessionName);
 	}
 
 	/**
