@@ -124,7 +124,6 @@ public class TimeModel {
 	 * @return
 	 */
 	private boolean loadSavedSessions() {
-		System.out.println("scrum slut:");
 		File saveFile = new File("output/userdata.csv");
 
 		Scanner key;
