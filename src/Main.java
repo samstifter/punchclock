@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -10,7 +9,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -135,7 +142,7 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		// =====Setup Time Components=====
-		timeController = new TimeController(timeModel, timeView, "");
+		timeController = new TimeController(timeModel, timeView);
 
 		// =====Create UI Elements====
 		txt = new Text("0:00:00");
@@ -165,14 +172,12 @@ public class Main extends Application {
 			startClicked = !startClicked;
 			if (startClicked) {
 				startButton.setText("Pause");
-				timeController.setSessionName(sessionName.getText());
 				timeController.startTime();
 				// timer.start();
 			} else {
 				startButton.setText("Start");
 				timeController.stopTime();
 				timeController.displayElapsedTimeInSeconds(timeModel);
-				timeController.setSessionName(sessionName.getText());
 			}
 		});
 
@@ -180,6 +185,10 @@ public class Main extends Application {
 			startButton.setText("Start");
 			timeController.stopTime();
 			timeController.resetTime();
+			sessionName.clear();
+		});
+		
+		sessionName.setOnKeyReleased(a -> {
 			timeController.setSessionName(sessionName.getText());
 		});
 
