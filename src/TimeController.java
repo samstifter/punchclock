@@ -13,23 +13,21 @@ import java.util.List;
 public class TimeController {
 	private TimeModel timeModel;
 	private TimeView timeView;
-	private String sessionName;
-
+	
 	/**
 	 * @param timeModel
 	 * @param timeView
 	 */
-	public TimeController(TimeModel timeModel, TimeView timeView, String sessionName) {
+	public TimeController(TimeModel timeModel, TimeView timeView) {
 		this.timeModel = timeModel;
 		this.timeView = timeView;
-		this.sessionName = sessionName;
 	}
 
 	/**
 	 * Starts the timer by recording the current time
 	 */
 	public void startTime() {
-		timeModel.startTime(sessionName);
+		timeModel.startTime();
 	}
 
 	/**
@@ -42,7 +40,7 @@ public class TimeController {
 	}
 
 	public void setSessionName(String sessionName) {
-		this.sessionName = sessionName;
+		this.timeModel.setCurrentSessionName(sessionName);
 	}
 
 	/**

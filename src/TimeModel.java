@@ -61,10 +61,9 @@ public class TimeModel {
 	/**
 	 * Starts the timer by recording the current time
 	 */
-	public void startTime(String sessionName) {
+	public void startTime() {
 		this.lastStart = System.currentTimeMillis();
 		this.isStarted = true;
-		currSession.setSessionName(sessionName);
 	}
 
 	/**
@@ -108,6 +107,10 @@ public class TimeModel {
 	public void addSession(Session session) {
 		this.sessions.add(session);
 	}
+	
+	public void setCurrentSessionName(String name){
+		this.getCurrentSession().setSessionName(name);
+	}
 
 	/**
 	 * @return
@@ -139,27 +142,29 @@ public class TimeModel {
 		}
 		key.close();
 
-		// Checks if all lines have 2 times
-		String[] times;
-		for (String session : sessions) {
-			times = session.split(",");
-			// DEBUG System.out.println(times[0].isEmpty());
-			if ((times.length % 3) != 0 && !times[0].isEmpty()) {
-				System.err.println("File Data Incorrect");
-				return false;
-			}
-		}
+		/*
+		 * // Checks if all lines have 2 times String[] times; for (String
+		 * session : sessions) { times = session.split(","); // DEBUG
+		 * System.out.println(times[0].isEmpty()); if ((times.length % 3) != 0
+		 * && !times[0].isEmpty()) { System.err.println("File Data Incorrect");
+		 * return false; } }
+		 */
 
 		// saves times as timepairs, and add to a session.
+		String[] times;
 		for (String line : sessions) {
 			Session session = new Session();
 			times = line.split(",");
 			if (!times[0].isEmpty()) {
-				for (int i = 1; i < times.length - 1; i += 2) {
+				for (int i = 0; i < times.length - 1; i += 2) {
 					TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
 					session.addTimePair(tp);
 				}
-				session.setSessionName(times[0]);
+				if (times.length % 2 != 0) {
+					session.setSessionName(times[times.length - 1]);
+				} else {
+					session.setSessionName("");
+				}
 				this.addSession(session);
 			}
 		}
@@ -199,7 +204,11 @@ public class TimeModel {
 			// Go through each pair of times
 			for (TimePair tp : session.getTimePairList()) {
 				// Print both times, each one followed by a comma.
-				out.printf("%s,%d,%d,", session.getSessionName(), tp.getStartTime(), tp.getEndTime());
+				out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
+			}
+			// Print the session name, if it exists, at the end of the list
+			if (session.getSessionName() != null) {
+				out.printf("%s,", session.getSessionName());
 			}
 			// Add a new line at the end of the session.
 			out.print("\n");
@@ -208,7 +217,7 @@ public class TimeModel {
 		out.close();
 		return true;
 	}
-	
+
 	public boolean writeToReadableFile() {
 		File outDir = new File("output");
 		File outFile = new File("output/UserLogs.csv");
@@ -323,7 +332,7 @@ public class TimeModel {
 			e.printStackTrace();
 			return false;
 		}
-		
+
 		try {
 			Runtime.getRuntime().exec("explorer.exe /select," + exportedFile.getAbsolutePath());
 		} catch (IOException e) {
