@@ -169,7 +169,7 @@ public class Main extends Application {
 		Button startButton = new Button("Start");
 		startButton.setFont(new Font(15));
 
-		Button resetButton = new Button("Reset");
+		Button resetButton = new Button("Save");
 		resetButton.setFont(new Font(15));
 		
 		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
@@ -191,7 +191,7 @@ public class Main extends Application {
 
 		startButton.setOnAction(a -> {
 			startClicked = !startClicked;
-			if (startClicked && appList.contains(trackingApp)) {
+			if (startClicked) {
 				startButton.setText("Pause");
 				timeController.startTime();
 				// timer.start();
@@ -204,6 +204,7 @@ public class Main extends Application {
 
 		resetButton.setOnAction(a -> {
 			startButton.setText("Start");
+			applicationList.setValue("NONE");
 			timeController.stopTime();
 			timeController.resetTime();
 			sessionName.clear();
@@ -217,6 +218,18 @@ public class Main extends Application {
 			ObservableList<String> currentAppList = FXCollections
 					.observableArrayList(appList.subList(0, appList.size()));
 			applicationList.setItems(currentAppList);
+		});
+		
+		enableAppTracking.setOnAction(a -> {
+			if(enableAppTracking.isSelected()){
+				startButton.setDisable(true);
+				applicationList.setDisable(false);
+			} else {
+				applicationList.setValue("NONE");
+				timeController.stopTime();
+				startButton.setDisable(false);
+				applicationList.setDisable(true);
+			}
 		});
 
 		applicationList.setOnAction(a -> {
