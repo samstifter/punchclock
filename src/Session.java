@@ -106,7 +106,7 @@ public class Session {
 
 		String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes, durationSeconds);
 
-		return dateFormat.format(dateStart) + " - " + durationString;
+		return dateFormat.format(dateStart) + " - " + durationString + " - " + this.getSessionName();
 	}
 
 	public List<Integer> getDuration() {

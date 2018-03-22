@@ -13,7 +13,7 @@ import java.util.List;
 public class TimeController {
 	private TimeModel timeModel;
 	private TimeView timeView;
-
+	
 	/**
 	 * @param timeModel
 	 * @param timeView
@@ -37,6 +37,10 @@ public class TimeController {
 	 */
 	public boolean stopTime() {
 		return timeModel.stopTime();
+	}
+
+	public void setSessionName(String sessionName) {
+		this.timeModel.setCurrentSessionName(sessionName);
 	}
 
 	/**
