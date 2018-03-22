@@ -53,7 +53,7 @@ public class Main extends Application {
 	}
 
 	/**
-	 * This is a background process that continiously updates the visible timer
+	 * This is a background process that continuously updates the visible timer
 	 */
 	public void updateCurrentSessionVisibleTime() {
 		while (true) {
@@ -242,7 +242,10 @@ public class Main extends Application {
 
 				Text editTitle = new Text("Edit Session");
 				editTitle.setFont(new Font(18));
-
+				
+				Text editSessionNameTitle = new Text("Set Session Name:");
+				editSessionNameTitle.setFont(new Font(15));
+				
 				Text hoursTitle = new Text("Hours");
 				Text minutesTitle = new Text("Minutes");
 				Text secondsTitle = new Text("Seconds");
@@ -271,12 +274,19 @@ public class Main extends Application {
 				
 				Spinner<Integer> secondSpinner = new Spinner<Integer>(secondValueFactory);
 				secondSpinner.setPrefWidth(50);
+				
+				//creating text field for edit session name
+				TextField editSessionName = new TextField(editingSession.getSessionName()); //logs.getSelectionModel()
+				editSessionName.setPrefSize(150, 5);
 
 				// confirm button and its handler
 				Button confirmEdit = new Button("Confirm Edit");
 
 				confirmEdit.setOnAction(c -> {
-
+					//changing the session name 
+					editingSession.setSessionName(editSessionName.getText());
+					
+					//setting the spinner value to the session 
 					long newDuration = hourSpinner.getValue() * 3600000 + minuteSpinner.getValue() * 60000
 							+ secondSpinner.getValue() * 1000;
 
@@ -291,8 +301,12 @@ public class Main extends Application {
 				});
 
 				// setting up the layout for editLogWindow
-				VBox layout = new VBox(35);
+				VBox layout = new VBox(25);
 				layout.setAlignment(Pos.CENTER);
+				
+				HBox editSessionBox = new HBox(10);
+				editSessionBox.getChildren().addAll(editSessionNameTitle, editSessionName);
+				editSessionBox.setAlignment(Pos.CENTER);
 				
 				GridPane spinners = new GridPane();
 				spinners.setAlignment(Pos.CENTER);
@@ -305,7 +319,7 @@ public class Main extends Application {
 				spinners.add(minuteSpinner, 1, 1);
 				spinners.add(secondSpinner, 2, 1);
 
-				layout.getChildren().addAll(editTitle, spinners, confirmEdit);
+				layout.getChildren().addAll(editTitle, editSessionBox, spinners, confirmEdit);
 
 				// starting up the scene
 				editLogWindow.setScene(new Scene(layout, 300, 200));
