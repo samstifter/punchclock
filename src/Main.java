@@ -392,7 +392,7 @@ public class Main extends Application {
 					chooser.setTitle("Select Directory");
 					File defaultDirectory = new File("output");
 					chooser.setInitialDirectory(defaultDirectory);
-					File selectedDirectory = chooser.showDialog(primaryStage);
+					File selectedDirectory = chooser.showDialog(previousLogWindow);
 					if(selectedDirectory != null) {
 					timeModel.setDirectory(selectedDirectory.getAbsolutePath());
 					}
