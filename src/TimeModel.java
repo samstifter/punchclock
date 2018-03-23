@@ -25,6 +25,7 @@ public class TimeModel {
 	private long lastStart;
 	private boolean isStarted;
 	private List<Session> sessions;
+	private String newDirPath = "output";
 
 	private Session currSession;
 
@@ -177,21 +178,21 @@ public class TimeModel {
 	 * @return true if file is written, false otherwise.
 	 */
 	public boolean saveSessions() {
-		File outDir = new File("output");
-		File outFile = new File("output/userdata.csv");
+		File outDirNonReadable = new File("output");
+		File outFileNonReadable = new File("output/userdata.csv");
 
 		List<Session> sessionList = this.getSessions();
 
 		// Make the directory if it doesn't exist.
 		try {
-			outDir.mkdir();
+			outDirNonReadable.mkdir();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
 
 		PrintWriter out;
 		try {
-			out = new PrintWriter(outFile);
+			out = new PrintWriter(outFileNonReadable);
 		} catch (IOException e) {
 			// If an exception with opening the file happens, return false.
 			System.err.println("Could not write file");
@@ -219,8 +220,9 @@ public class TimeModel {
 	}
 
 	public boolean writeToReadableFile() {
-		File outDir = new File("output");
-		File outFile = new File("output/UserLogs.csv");
+		File outDir = new File(newDirPath);
+		File outFile = new File(newDirPath + "/UserLogs.csv");
+		
 
 		// Make the directory if it doesn't exist.
 		try {
@@ -322,7 +324,7 @@ public class TimeModel {
 				}
 			}
 		}
-		String dir = "output/range" + getNumberOfExportedRangeFiles() + ".csv";
+		String dir = newDirPath +  "/range" + getNumberOfExportedRangeFiles() + ".csv";
 		File exportedFile = new File(dir);
 		try {
 			PrintWriter pw = new PrintWriter(exportedFile);
@@ -360,5 +362,10 @@ public class TimeModel {
 
 	public List<Session> getSessions() {
 		return sessions;
+	}
+	
+	public void setDirectory(String dirName) {
+		System.out.println(dirName);
+		newDirPath = dirName;
 	}
 }

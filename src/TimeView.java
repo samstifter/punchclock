@@ -1,4 +1,3 @@
-
 /**
  * The TimeView class is the View component of the MVC framework. 
  * It should only contain methods that pertain to the displaying of info

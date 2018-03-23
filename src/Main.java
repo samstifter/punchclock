@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+
 
 /**
  *
@@ -242,7 +247,11 @@ public class Main extends Application {
 					// DEBUG System.out.println(logs.getSelectionModel().getSelectedIndex());
 				}
 			});
+			
+			Button directoryExportButton = new Button("Change Export Directory");
+			directoryExportButton.setText("Change Export Directory");
 
+			
 			// edit button handler
 			editButton.setOnAction(b -> {
 				Stage editLogWindow = new Stage();
@@ -336,6 +345,21 @@ public class Main extends Application {
 				editLogWindow.show();
 
 			});
+			
+			directoryExportButton.setOnAction(b -> {
+				startClicked = !startClicked;
+				if (startClicked) {
+					DirectoryChooser chooser = new DirectoryChooser();
+					chooser.setTitle("Select Directory");
+					File defaultDirectory = new File("output");
+					chooser.setInitialDirectory(defaultDirectory);
+					File selectedDirectory = chooser.showDialog(primaryStage);
+					if(selectedDirectory != null) {
+					timeModel.setDirectory(selectedDirectory.getAbsolutePath());
+					}
+					 
+				}
+			});
 
 			// delete button handler
 			deleteButton.setOnAction(b -> {
@@ -370,7 +394,7 @@ public class Main extends Application {
 			deleteEditButtons.setAlignment(Pos.CENTER);
 			dates.getChildren().addAll(startDate, endDate);
 			dates.setAlignment(Pos.CENTER);
-			layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton);
+			layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton, directoryExportButton);
 			layout.setAlignment(Pos.CENTER);
 			previousLogWindow.setScene(new Scene(layout, 300, 400));
 			previousLogWindow.show();
