@@ -47,6 +47,8 @@ public class Main extends Application {
 
 	private List<String> appList = new ArrayList<String>();
 
+	private String trackingApp = "NONE";
+
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
 		timeView = new TimeView();
@@ -137,9 +139,25 @@ public class Main extends Application {
 				input.close();
 				appList = fetchedList;
 
-				Thread.sleep(1000);
+				
 			} catch (Exception err) {
 				err.printStackTrace();
+			}
+			
+			if(!appList.contains(trackingApp)){
+				timeController.stopTime();
+				//startClicked = false;
+			} else {
+				if(trackingApp != null && !trackingApp.equals("NONE")){
+					//startClicked = true;
+					timeController.startTime();
+				}
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -156,14 +174,17 @@ public class Main extends Application {
 		Button startButton = new Button("Start");
 		startButton.setFont(new Font(15));
 
-		Button resetButton = new Button("Reset");
+		Button resetButton = new Button("Save");
 		resetButton.setFont(new Font(15));
+		
+		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
 
 		Text applicationListTitle = new Text("Application to Track");
 		Text logNameTitle = new Text("Set Session Name");
 
 		ComboBox<String> applicationList = new ComboBox<String>();
 		applicationList.setValue("NONE");
+		applicationList.setDisable(true);
 
 		Button viewPrevious = new Button("View Previous Sessions");
 		viewPrevious.setFont(new Font(15));
@@ -188,6 +209,7 @@ public class Main extends Application {
 
 		resetButton.setOnAction(a -> {
 			startButton.setText("Start");
+			applicationList.setValue("NONE");
 			timeController.stopTime();
 			timeController.resetTime();
 			sessionName.clear();
@@ -201,6 +223,22 @@ public class Main extends Application {
 			ObservableList<String> currentAppList = FXCollections
 					.observableArrayList(appList.subList(0, appList.size()));
 			applicationList.setItems(currentAppList);
+		});
+		
+		enableAppTracking.setOnAction(a -> {
+			if(enableAppTracking.isSelected()){
+				startButton.setDisable(true);
+				applicationList.setDisable(false);
+			} else {
+				applicationList.setValue("NONE");
+				timeController.stopTime();
+				startButton.setDisable(false);
+				applicationList.setDisable(true);
+			}
+		});
+
+		applicationList.setOnAction(a -> {
+			trackingApp = applicationList.getValue();
 		});
 
 		viewPrevious.setOnAction(a -> {
@@ -244,7 +282,8 @@ public class Main extends Application {
 				if (logs.getSelectionModel().getSelectedItem() != null) {
 					editButton.setDisable(false);
 					deleteButton.setDisable(false);
-					// DEBUG System.out.println(logs.getSelectionModel().getSelectedIndex());
+					// DEBUG
+					// System.out.println(logs.getSelectionModel().getSelectedIndex());
 				}
 			});
 			
@@ -286,10 +325,10 @@ public class Main extends Application {
 
 				Spinner<Integer> hourSpinner = new Spinner<Integer>(hourValueFactory);
 				hourSpinner.setPrefWidth(50);
-				
+
 				Spinner<Integer> minuteSpinner = new Spinner<Integer>(minuteValueFactory);
 				minuteSpinner.setPrefWidth(50);
-				
+
 				Spinner<Integer> secondSpinner = new Spinner<Integer>(secondValueFactory);
 				secondSpinner.setPrefWidth(50);
 				
@@ -325,11 +364,11 @@ public class Main extends Application {
 				HBox editSessionBox = new HBox(10);
 				editSessionBox.getChildren().addAll(editSessionNameTitle, editSessionName);
 				editSessionBox.setAlignment(Pos.CENTER);
-				
+
 				GridPane spinners = new GridPane();
 				spinners.setAlignment(Pos.CENTER);
 				spinners.setHgap(25);
-				
+
 				spinners.add(hoursTitle, 0, 0);
 				spinners.add(minutesTitle, 1, 0);
 				spinners.add(secondsTitle, 2, 0);
@@ -400,7 +439,6 @@ public class Main extends Application {
 			previousLogWindow.show();
 		});
 
-
 		// ====Create====
 
 		primaryStage.setTitle("PunchClock");
@@ -420,7 +458,7 @@ public class Main extends Application {
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(txt, logNames, controlButtons, applicationSelect, viewPrevious);
+		verticalBox.getChildren().addAll(txt, logNames, controlButtons, enableAppTracking, applicationSelect, viewPrevious);
 		verticalBox.setAlignment(Pos.CENTER);
 
 		// ====Start Background Threads====
@@ -434,10 +472,5 @@ public class Main extends Application {
 		primaryStage.setOnCloseRequest(a -> {
 			Platform.exit();
 		});
-	}
-
-	@Override
-	public void stop() {
-		System.out.println("Stage is closing");
 	}
 }

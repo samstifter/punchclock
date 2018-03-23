@@ -62,9 +62,14 @@ public class TimeModel {
 	/**
 	 * Starts the timer by recording the current time
 	 */
-	public void startTime() {
-		this.lastStart = System.currentTimeMillis();
-		this.isStarted = true;
+	public boolean startTime() {
+		if (!isStarted) {
+			this.lastStart = System.currentTimeMillis();
+			this.isStarted = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
