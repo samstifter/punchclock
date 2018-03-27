@@ -16,6 +16,7 @@ public class Session {
 	 * A session object holding a list of time pairs.
 	 */
 	public Session() {
+		this.sessionName = "";
 		this.timePairList = new ArrayList<TimePair>();
 
 	}
@@ -27,7 +28,7 @@ public class Session {
 	 *            The name given to the session
 	 */
 	public Session(String name) {
-		this.sessionName = name;
+		this.setSessionName(name);
 		this.timePairList = new ArrayList<TimePair>();
 	}
 
@@ -41,19 +42,23 @@ public class Session {
 	}
 
 	/**
-	 * Sets the name of the session.
+	 * Sets the name of the session. If null, it converts to an empty string
 	 * 
 	 * @param sessionName
 	 *            name to set session
 	 */
 	public void setSessionName(String sessionName) {
-		this.sessionName = sessionName;
+		if (sessionName == null) {
+			this.sessionName = "";
+		} else {
+			this.sessionName = sessionName;
+		}
 	}
 
 	/**
 	 * Returns the sessions list of time pairs.
 	 * 
-	 * @return timePair
+	 * @return timePair list
 	 */
 	public List<TimePair> getTimePairList() {
 		return timePairList;
@@ -63,14 +68,17 @@ public class Session {
 	 * Sets the sessions time pair list.
 	 * 
 	 * @param timePairList
+	 *            List containing the new TimePairs.
 	 */
 	public void setTimePairList(List<TimePair> timePairList) {
 		this.timePairList = timePairList;
 	}
 
 	/**
+	 * Adds a time pair to the Session.
 	 * 
 	 * @param tp
+	 *            TimePair to be added.
 	 */
 	public void addTimePair(TimePair tp) {
 		if (tp != null)
@@ -80,7 +88,7 @@ public class Session {
 	/**
 	 * Gets the total elapsed time of all time pairs in a session.
 	 * 
-	 * @return Total elapsed time in session.
+	 * @return Total elapsed time in session in Milliseconds
 	 */
 	public long getTotalTime() {
 		long time = 0;
@@ -90,6 +98,7 @@ public class Session {
 		return time;
 	}
 
+	@Override
 	public String toString() {
 		if (this.getTimePairList().isEmpty()) {
 			return "Empty session";
@@ -109,6 +118,12 @@ public class Session {
 		return dateFormat.format(dateStart) + " - " + durationString + " - " + this.getSessionName();
 	}
 
+	/**
+	 * Returns a list of the duration values for seconds, minutes, and hours.
+	 * List is formatted with hours first, minutes second, and seconds third
+	 * 
+	 * @return A list of the duration values
+	 */
 	public List<Integer> getDuration() {
 		List<Integer> durations = new ArrayList<Integer>();
 		int totalSeconds = (int) this.getTotalTime() / 1000;
