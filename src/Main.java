@@ -28,8 +28,6 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 
 /**
@@ -41,9 +39,7 @@ public class Main extends Application {
 	static TimeView timeView;
 	static TimeController timeController;
 
-	Thread timer;
-	private boolean startClicked = false;
-	Text txt;
+	Text timerText;
 
 	private List<String> appList = new ArrayList<String>();
 
@@ -52,9 +48,13 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
 		timeView = new TimeView();
+		timeModel.loadSavedSessions();
 		launch(args);
 	}
 
+	/**
+	 * Starts a new thread to update the time in the window
+	 */
 	public void startUpdateCurrentSessionVisibleTime() {
 		Runnable task = new Runnable() {
 			public void run() {
@@ -88,7 +88,7 @@ public class Main extends Application {
 						String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes,
 								durationSeconds);
 
-						txt.setText(durationString);
+						timerText.setText(durationString);
 					}
 				});
 
@@ -99,6 +99,9 @@ public class Main extends Application {
 		}
 	}
 
+	/**
+	 * Starts a new thread to get the list of currently running applications
+	 */
 	public void startGetAppWindows() {
 		Runnable task = new Runnable() {
 			public void run() {
@@ -113,7 +116,6 @@ public class Main extends Application {
 	/**
 	 * Uses Powershell command to find a list of applications running processes
 	 * that also have a visible window. Updates the appList
-	 *
 	 */
 	public void getAppWindows() {
 		while (true) {
@@ -146,10 +148,8 @@ public class Main extends Application {
 			
 			if(!appList.contains(trackingApp)){
 				timeController.stopTime();
-				//startClicked = false;
 			} else {
 				if(trackingApp != null && !trackingApp.equals("NONE")){
-					//startClicked = true;
 					timeController.startTime();
 				}
 			}
@@ -168,14 +168,15 @@ public class Main extends Application {
 		timeController = new TimeController(timeModel, timeView);
 
 		// =====Create UI Elements====
-		txt = new Text("0:00:00");
-		txt.setFont(new Font(45));
+		timerText = new Text("0:00:00");
+		timerText.setFont(new Font(45));
 
 		Button startButton = new Button("Start");
 		startButton.setFont(new Font(15));
 
-		Button resetButton = new Button("Save");
-		resetButton.setFont(new Font(15));
+		Button saveButton = new Button("Save");
+		saveButton.setFont(new Font(15));
+		saveButton.setDisable(true);
 		
 		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
 
@@ -195,24 +196,25 @@ public class Main extends Application {
 		// ====Define functionality====
 
 		startButton.setOnAction(a -> {
-			startClicked = !startClicked;
-			if (startClicked) {
+			if (!timeModel.isStarted()) {
 				startButton.setText("Pause");
 				timeController.startTime();
-				// timer.start();
 			} else {
 				startButton.setText("Start");
 				timeController.stopTime();
 				timeController.displayElapsedTimeInSeconds(timeModel);
 			}
+			saveButton.setDisable(false);
 		});
 
-		resetButton.setOnAction(a -> {
+		saveButton.setOnAction(a -> {
 			startButton.setText("Start");
 			applicationList.setValue("NONE");
 			timeController.stopTime();
-			timeController.resetTime();
+			timeController.endCurrentSession();
+			timeController.saveSessions();
 			sessionName.clear();
+			saveButton.setDisable(true);
 		});
 		
 		sessionName.setOnKeyReleased(a -> {
@@ -348,7 +350,6 @@ public class Main extends Application {
 							+ secondSpinner.getValue() * 1000;
 
 					timeController.editSession(logs.getSelectionModel().getSelectedIndex(), newDuration);
-					timeController.saveSessions();
 
 					logs.setItems(FXCollections.observableArrayList(timeModel.getFormattedSessionList()));
 					deleteButton.setDisable(true);
@@ -386,17 +387,13 @@ public class Main extends Application {
 			});
 			
 			directoryExportButton.setOnAction(b -> {
-				startClicked = !startClicked;
-				if (startClicked) {
-					DirectoryChooser chooser = new DirectoryChooser();
-					chooser.setTitle("Select Directory");
-					File defaultDirectory = new File("output");
-					chooser.setInitialDirectory(defaultDirectory);
-					File selectedDirectory = chooser.showDialog(previousLogWindow);
-					if(selectedDirectory != null) {
-					timeModel.setDirectory(selectedDirectory.getAbsolutePath());
-					}
-					 
+				DirectoryChooser chooser = new DirectoryChooser();
+				chooser.setTitle("Select Directory");
+				File defaultDirectory = new File("output");
+				chooser.setInitialDirectory(defaultDirectory);
+				File selectedDirectory = chooser.showDialog(previousLogWindow);
+				if(selectedDirectory != null) {
+				timeModel.setDirectory(selectedDirectory.getAbsolutePath());
 				}
 			});
 
@@ -447,7 +444,7 @@ public class Main extends Application {
 		scene.setFill(Color.OLDLACE);
 
 		HBox controlButtons = new HBox(40);
-		controlButtons.getChildren().addAll(startButton, resetButton);
+		controlButtons.getChildren().addAll(startButton, saveButton);
 		controlButtons.setAlignment(Pos.CENTER);
 
 		HBox logNames = new HBox(10);
@@ -458,7 +455,7 @@ public class Main extends Application {
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(txt, logNames, controlButtons, enableAppTracking, applicationSelect, viewPrevious);
+		verticalBox.getChildren().addAll(timerText, logNames, controlButtons, enableAppTracking, applicationSelect, viewPrevious);
 		verticalBox.setAlignment(Pos.CENTER);
 
 		// ====Start Background Threads====
