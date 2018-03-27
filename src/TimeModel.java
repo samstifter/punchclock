@@ -23,35 +23,36 @@ import java.util.Scanner;
  */
 public class TimeModel {
 	private long lastStart;
-	private boolean isStarted;
+	private boolean started;
 	private List<Session> sessions;
 	private String newDirPath = "output";
 
 	private Session currSession;
 
 	/**
-	 * 
+	 * Constructs a new TimeModel with an empty list, empty session, and a start
+	 * time of 0.
 	 */
 	public TimeModel() {
 		this.lastStart = 0;
 		this.sessions = new ArrayList<Session>();
-		loadSavedSessions();
 		this.currSession = new Session();
 	}
 
 	/**
+	 * Get the current session time in milliseconds
 	 *
-	 * @return Total Elapsed milliseconds of current session
+	 * @return Total elapsed milliseconds of current session
 	 */
 	public long getCurrentSessionTime() {
 		long totalTime = currSession.getTotalTime();
-		if (isStarted)
+		if (started)
 			totalTime += getTimeSinceLastStart();
 		return totalTime;
 	}
 
 	/**
-	 * Get the time of only the most recent session
+	 * Get the time of only the session currently used for timing
 	 * 
 	 * @return the elapsed time of the most recent session
 	 */
@@ -63,9 +64,9 @@ public class TimeModel {
 	 * Starts the timer by recording the current time
 	 */
 	public boolean startTime() {
-		if (!isStarted) {
+		if (!started) {
 			this.lastStart = System.currentTimeMillis();
-			this.isStarted = true;
+			this.started = true;
 			return true;
 		} else {
 			return false;
@@ -73,15 +74,20 @@ public class TimeModel {
 	}
 
 	/**
-	 *
-	 * @return True if the time was started (aka time was started previously),
-	 *         false otherwise
+	 * Stops the time and creates a time pair and adds it to the session
+	 * 
+	 * @return True if the time was stopped as a reslut of this call, false otherwise
 	 */
 	public boolean stopTime() {
-		if (this.isStarted) {
-			this.currSession.getTimePairList().add(new TimePair(lastStart, System.currentTimeMillis()));
-			this.lastStart = 0;
-			this.isStarted = false;
+		if (this.started) {
+			try {
+				this.currSession.getTimePairList().add(new TimePair(lastStart, System.currentTimeMillis()));
+				this.lastStart = 0;
+				this.started = false;
+			} catch (IllegalArgumentException e) {
+				return false; // If the end time is before the start time, a
+								// timepair cannot be created.
+			}
 		} else {
 			return false; // A Timer that is not started can not be stopped
 		}
@@ -92,14 +98,13 @@ public class TimeModel {
 	 * Resets the TimeModel, removing any TimePairs and "stopping" the time
 	 */
 	public void resetTime() {
-		this.isStarted = false;
+		this.started = false;
 		this.lastStart = 0;
-		sessions.add(this.currSession);
 		this.currSession = new Session();
 	}
 
 	/**
-	 * Returns the list of time pairs
+	 * Returns the current session object
 	 * 
 	 * @return List of time pairs.
 	 */
@@ -108,18 +113,35 @@ public class TimeModel {
 	}
 
 	/**
+	 * Adds a session to the list if the time pair list is not empty
+	 * 
 	 * @param session
 	 */
 	public void addSession(Session session) {
-		this.sessions.add(session);
-	}
-	
-	public void setCurrentSessionName(String name){
-		this.getCurrentSession().setSessionName(name);
+		if (!session.getTimePairList().isEmpty()) {
+			this.sessions.add(session);
+		}
 	}
 
 	/**
-	 * @return
+	 * Sets the name of the current session
+	 * 
+	 * @param name
+	 *            New name for the session
+	 */
+	public void setCurrentSessionName(String name) {
+		this.getCurrentSession().setSessionName(name);
+	}
+	
+	public boolean isStarted(){
+		return started;
+	}
+
+	/**
+	 * Returns a list of the toString representation of each session (Start date
+	 * and time, duration, and name if it has one)
+	 * 
+	 * @return a List of the Sessions represented by their toString
 	 */
 	public ArrayList<String> getFormattedSessionList() {
 		ArrayList<String> list = new ArrayList<String>();
@@ -130,16 +152,18 @@ public class TimeModel {
 	}
 
 	/**
+	 * Loads the saved userdata csv. If the file is not present, it aborts, and
+	 * if the file is formatted incorrectly, it aborts
+	 * 
 	 * @return
 	 */
-	private boolean loadSavedSessions() {
+	public boolean loadSavedSessions() {
 		File saveFile = new File("output/userdata.csv");
 
 		Scanner key;
 		try {
 			key = new Scanner(saveFile);
 		} catch (FileNotFoundException e) {
-			System.err.println("FileNotFoundException");
 			return false;
 		}
 		List<String> sessions = new ArrayList<String>();
@@ -148,14 +172,6 @@ public class TimeModel {
 		}
 		key.close();
 
-		/*
-		 * // Checks if all lines have 2 times String[] times; for (String
-		 * session : sessions) { times = session.split(","); // DEBUG
-		 * System.out.println(times[0].isEmpty()); if ((times.length % 3) != 0
-		 * && !times[0].isEmpty()) { System.err.println("File Data Incorrect");
-		 * return false; } }
-		 */
-
 		// saves times as timepairs, and add to a session.
 		String[] times;
 		for (String line : sessions) {
@@ -163,8 +179,14 @@ public class TimeModel {
 			times = line.split(",");
 			if (!times[0].isEmpty()) {
 				for (int i = 0; i < times.length - 1; i += 2) {
-					TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
-					session.addTimePair(tp);
+					try {
+						TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
+						session.addTimePair(tp);
+					} catch (Exception e) {
+						sessions.clear();
+						return false;
+					}
+
 				}
 				if (times.length % 2 != 0) {
 					session.setSessionName(times[times.length - 1]);
@@ -178,7 +200,7 @@ public class TimeModel {
 	}
 
 	/**
-	 * Writes the time pairs of the current session to a file in CSV format.
+	 * Writes the sessions to a file in CSV format.
 	 * 
 	 * @return true if file is written, false otherwise.
 	 */
@@ -224,10 +246,14 @@ public class TimeModel {
 		return true;
 	}
 
+	/**
+	 * Writes the sessions to a human readable format.
+	 * 
+	 * @return true if the write happens, false otherwise
+	 */
 	public boolean writeToReadableFile() {
 		File outDir = new File(newDirPath);
 		File outFile = new File(newDirPath + "/UserLogs.csv");
-		
 
 		// Make the directory if it doesn't exist.
 		try {
@@ -285,6 +311,16 @@ public class TimeModel {
 		return true;
 	}
 
+	/**
+	 * Writes the sessions from a specified date range to a human readable
+	 * format
+	 * 
+	 * @param start
+	 *            Start Date
+	 * @param end
+	 *            End Date
+	 * @return true if the file is written, false otherwise
+	 */
 	public boolean writeToReadableFile(LocalDate start, LocalDate end) {
 		// Set up start Millis
 		Instant startDate = Instant.from(start.atStartOfDay(ZoneId.of("UTC")));
@@ -329,7 +365,7 @@ public class TimeModel {
 				}
 			}
 		}
-		String dir = newDirPath +  "/range" + getNumberOfExportedRangeFiles() + ".csv";
+		String dir = newDirPath + "/range" + getNumberOfExportedRangeFiles() + ".csv";
 		File exportedFile = new File(dir);
 		try {
 			PrintWriter pw = new PrintWriter(exportedFile);
@@ -350,7 +386,8 @@ public class TimeModel {
 	}
 
 	/**
-	 *
+	 * Get the number of range files that already exist
+	 * 
 	 * @return number of range files
 	 */
 	public int getNumberOfExportedRangeFiles() {
@@ -365,10 +402,21 @@ public class TimeModel {
 		return ++count;
 	}
 
+	/**
+	 * Get a list containing Session objects
+	 * 
+	 * @return The list containing the Session objects
+	 */
 	public List<Session> getSessions() {
 		return sessions;
 	}
-	
+
+	/**
+	 * Sets the new directory to export to
+	 * 
+	 * @param dirName
+	 *            New Directory
+	 */
 	public void setDirectory(String dirName) {
 		System.out.println(dirName);
 		newDirPath = dirName;
