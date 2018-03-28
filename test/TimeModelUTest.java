@@ -234,4 +234,16 @@ public class TimeModelUTest {
         assertEquals("newDirectory", timeModel.getDirectory());
     }
 
+    @Test
+    public void setLastStart() {
+        timeModel.setLastStart(20);
+        assertEquals(20, timeModel.getLastStart());
+    }
+
+    @Test
+    public void setCurrentSession() {
+        timeModel.setCurrentSession(currSession);
+        assertEquals(currSession, timeModel.getCurrentSession());
+    }
+
 }
