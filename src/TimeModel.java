@@ -412,6 +412,14 @@ public class TimeModel {
 	}
 
 	/**
+	 * Sets the TimeModel's session to sessions
+	 * @param sessions
+	 */
+	public void setSessions(List<Session> sessions) {
+		this.sessions = sessions;
+	}
+
+	/**
 	 * Sets the new directory to export to
 	 * 
 	 * @param dirName
@@ -420,5 +428,14 @@ public class TimeModel {
 	public void setDirectory(String dirName) {
 		System.out.println(dirName);
 		newDirPath = dirName;
+	}
+
+	/**
+	 * Returns the TimeModel's last start
+	 *
+	 * @return The TimeModel's last start
+	 */
+	public long getLastStart() {
+		return lastStart;
 	}
 }
