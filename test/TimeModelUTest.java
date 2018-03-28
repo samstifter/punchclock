@@ -37,14 +37,27 @@ public class TimeModelUTest {
     }
 
     @Test
-    public void getCurrentSessionTime_started() {
+    public void getCurrentSessionTime_started() throws Exception {
         TimePair pair0 = new TimePair(0, 20);
         currSession.addTimePair(pair0);
         TimePair pair1 = new TimePair(40, 80);
         currSession.addTimePair(pair1);
         timeModel.setCurrentSession(currSession);
         timeModel.startTime();
+        Thread.sleep(40);
         assertTrue(timeModel.getCurrentSessionTime() > 0);
+        assertTrue(timeModel.getCurrentSessionTime() > 60);
+    }
+
+    @Test
+    public void startTime_timeNotStarted() {
+        assertTrue(timeModel.startTime());
+    }
+
+    @Test
+    public void startTime_timeStarted() {
+        timeModel.startTime();
+        assertFalse(timeModel.startTime());
     }
 
 }
