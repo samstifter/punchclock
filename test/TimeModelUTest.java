@@ -186,9 +186,23 @@ public class TimeModelUTest {
         assertEquals(list, timeModel.getFormattedSessionList());
     }
 
+    //The following three tests could obviously be fleshed out more, but a proper way of testing would be
+    //have to be very extensive and time consuming. For now, manual testing should be sufficient,
+    //however if any of these tests returns false, it would still be a good
+    //indicator that something is wrong.
     @Test
-    public void loadSaveSessions() {
+    public void loadSavedSessions() {
         assertTrue(timeModel.loadSavedSessions());
+    }
+
+    @Test
+    public void saveSessions() {
+        assertTrue(timeModel.saveSessions());
+    }
+
+    @Test
+    public void writeToReadableFile() {
+        assertTrue(timeModel.writeToReadableFile());
     }
 
     @Test
