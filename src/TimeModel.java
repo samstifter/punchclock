@@ -438,4 +438,13 @@ public class TimeModel {
 	public long getLastStart() {
 		return lastStart;
 	}
+
+	/**
+	 * Sets the current session to currSession. Used for testing,
+	 * but could be used in the future for convenience
+	 * @param currSession
+	 */
+	public void setCurrentSession(Session currSession) {
+		this.currSession = currSession;
+	}
 }
