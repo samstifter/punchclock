@@ -439,6 +439,15 @@ public class TimeModel {
 		return lastStart;
 	}
 
+
+	/**
+	 * Sets the last start. Used for testing
+	 * @param lastStart the new last start time
+	 */
+	public void setLastStart(long lastStart) {
+		this.lastStart = lastStart;
+	}
+
 	/**
 	 * Sets the current session to currSession. Used for testing,
 	 * but could be used in the future for convenience
