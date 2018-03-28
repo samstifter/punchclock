@@ -186,4 +186,52 @@ public class TimeModelUTest {
         assertEquals(list, timeModel.getFormattedSessionList());
     }
 
+    @Test
+    public void loadSaveSessions() {
+        assertTrue(timeModel.loadSavedSessions());
+    }
+
+    @Test
+    public void getSessions() {
+        Session session = new Session();
+        TimePair timePair = new TimePair(0, 20);
+        List<TimePair> timePairList = new ArrayList<>();
+        timePairList.add(timePair);
+        session.setTimePairList(timePairList);
+
+        List<Session> sessions = new ArrayList<>();
+        sessions.add(session);
+
+        timeModel.addSession(session);
+
+        assertEquals(sessions, timeModel.getSessions());
+    }
+
+    @Test
+    public void setSessions() {
+        Session session = new Session();
+        TimePair timePair = new TimePair(0, 20);
+        List<TimePair> timePairList = new ArrayList<>();
+        timePairList.add(timePair);
+        session.setTimePairList(timePairList);
+
+        List<Session> sessions = new ArrayList<>();
+        sessions.add(session);
+
+        assertEquals(0, timeModel.getSessions().size());
+
+        timeModel.setSessions(sessions);
+
+        assertEquals(sessions, timeModel.getSessions());
+    }
+
+    @Test
+    public void setDirectory() {
+        assertEquals("output", timeModel.getDirectory());
+
+        timeModel.setDirectory("newDirectory");
+
+        assertEquals("newDirectory", timeModel.getDirectory());
+    }
+
 }

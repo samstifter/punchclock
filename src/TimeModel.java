@@ -430,6 +430,14 @@ public class TimeModel {
 		newDirPath = dirName;
 	}
 
+    /**
+     * Returns the TimeModel's directory. Used primarily for testing.
+     * @return
+     */
+	public String getDirectory() {
+	    return newDirPath;
+    }
+
 	/**
 	 * Returns the TimeModel's last start
 	 *
