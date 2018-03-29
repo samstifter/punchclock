@@ -193,9 +193,6 @@ public class Main extends Application {
 		applicationList.setValue("NONE");
 		applicationList.setDisable(true);
 
-		Button viewPrevious = new Button("View Previous Sessions");
-		viewPrevious.setFont(new Font(15));
-
 		TextField sessionName = new TextField();
 		sessionName.setPrefSize(150, 5);
 
@@ -248,10 +245,19 @@ public class Main extends Application {
 		applicationList.setOnAction(a -> {
 			trackingApp = applicationList.getValue();
 		});
+		
+		// ====Menu Bar====
+		MenuBar menuBar = new MenuBar();
+		Menu menuWindow = new Menu("Window");
+		MenuItem previousLogs = new MenuItem("View Previous Logs");
 
-		viewPrevious.setOnAction(a -> {
+		previousLogs.setOnAction(a -> {
 			previousLogWindow(viewPreviousWindow);
 		});
+		
+		
+		menuWindow.getItems().addAll(previousLogs);
+		menuBar.getMenus().addAll(menuWindow);
 		
 		// ====Create====
 
@@ -272,8 +278,8 @@ public class Main extends Application {
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(timerText, logNames, controlButtons, enableAppTracking, applicationSelect, viewPrevious);
-		verticalBox.setAlignment(Pos.CENTER);
+		verticalBox.getChildren().addAll(menuBar, timerText, logNames, controlButtons, enableAppTracking, applicationSelect);
+		verticalBox.setAlignment(Pos.TOP_CENTER);
 
 		// ====Start Background Threads====
 		startUpdateCurrentSessionVisibleTime();
