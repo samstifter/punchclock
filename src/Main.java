@@ -42,7 +42,8 @@ public class Main extends Application {
 	static TimeView timeView;
 	static TimeController timeController;
 
-	Text timerText;
+	private Text timerText;
+	private Text miniTimerText;
 
 	private List<String> appList = new ArrayList<String>();
 
@@ -92,6 +93,7 @@ public class Main extends Application {
 								durationSeconds);
 
 						timerText.setText(durationString);
+						miniTimerText.setText(durationString);
 					}
 				});
 
@@ -172,10 +174,14 @@ public class Main extends Application {
 		
 		// Set up Stages
 		Stage viewPreviousWindow = new Stage();
+		Stage viewMiniTimerWindow = new Stage();
 
 		// =====Create UI Elements====
 		timerText = new Text("0:00:00");
 		timerText.setFont(new Font(45));
+		
+		miniTimerText = new Text("0:00:00");
+		miniTimerText.setFont(new Font(45));
 
 		Button startButton = new Button("Start");
 		startButton.setFont(new Font(15));
@@ -250,18 +256,23 @@ public class Main extends Application {
 		MenuBar menuBar = new MenuBar();
 		Menu menuWindow = new Menu("Window");
 		MenuItem previousLogs = new MenuItem("View Previous Logs");
+		MenuItem miniTimer = new MenuItem("MiniTimer");
 
 		previousLogs.setOnAction(a -> {
 			previousLogWindow(viewPreviousWindow);
 		});
 		
+		miniTimer.setOnAction(a -> {
+			miniTimerWindow(viewMiniTimerWindow, primaryStage);
+		});
 		
-		menuWindow.getItems().addAll(previousLogs);
+		menuWindow.getItems().addAll(previousLogs, miniTimer);
 		menuBar.getMenus().addAll(menuWindow);
 		
 		// ====Create====
 
 		primaryStage.setTitle("PunchClock");
+		primaryStage.setResizable(false);
 		VBox verticalBox = new VBox(30);
 		Scene scene = new Scene(verticalBox, 400, 400);
 		scene.setFill(Color.OLDLACE);
@@ -294,6 +305,12 @@ public class Main extends Application {
 		});
 	}
 	
+	/**
+	 * Shows the previous recorded sessions in the given Stage
+	 * 
+	 * @param window 
+	 * 			Stage to show the sessions in
+	 */
 	private void previousLogWindow(Stage window){
 		Stage previousLogWindow = window;
 		previousLogWindow.setTitle("Previous Session Logs");
@@ -485,5 +502,33 @@ public class Main extends Application {
 		layout.setAlignment(Pos.CENTER);
 		previousLogWindow.setScene(new Scene(layout, 300, 400));
 		previousLogWindow.show();
+	}
+
+	/**
+	 * Shows a mini timer window with only the timer.
+	 * 
+	 * @param window 
+	 * 			The stage for the minitimer
+	 * @param primaryWindow
+	 * 			The main stage
+	 */
+	private void miniTimerWindow(Stage window, Stage primaryWindow){
+		Stage miniTimerWindow = window;
+		VBox miniLayout = new VBox(5);
+		Scene miniScene = new Scene(miniLayout, 200, 60);
+		
+		miniLayout.setAlignment(Pos.CENTER);
+		miniLayout.getChildren().addAll(miniTimerText);
+		
+		miniTimerWindow.setResizable(false);
+		miniTimerWindow.setAlwaysOnTop(true);
+		miniTimerWindow.setTitle("Timer");
+		miniTimerWindow.setScene(miniScene);
+		
+		miniTimerWindow.show();
+		
+		miniTimerWindow.setOnCloseRequest(a -> {
+			primaryWindow.requestFocus();
+		});
 	}
 }
