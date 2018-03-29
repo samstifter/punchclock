@@ -208,10 +208,12 @@ public class Main extends Application {
 			if (!timeModel.isStarted()) {
 				startButton.setText("Pause");
 				timeController.startTime();
+				enableAppTracking.setDisable(true);
 			} else {
 				startButton.setText("Start");
 				timeController.stopTime();
 				timeController.displayElapsedTimeInSeconds(timeModel);
+				enableAppTracking.setDisable(false);
 			}
 			saveButton.setDisable(false);
 		});
@@ -231,6 +233,9 @@ public class Main extends Application {
 		});
 
 		applicationList.setOnShowing(a -> {
+			if (!appList.contains(trackingApp)){
+				applicationList.setValue("NONE");
+			}
 			ObservableList<String> currentAppList = FXCollections
 					.observableArrayList(appList.subList(0, appList.size()));
 			applicationList.setItems(currentAppList);
@@ -250,6 +255,9 @@ public class Main extends Application {
 
 		applicationList.setOnAction(a -> {
 			trackingApp = applicationList.getValue();
+			if (trackingApp != "NONE"){
+				saveButton.setDisable(false);
+			}
 		});
 		
 		// ====Menu Bar====
