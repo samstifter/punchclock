@@ -48,8 +48,8 @@ public class Session {
 	 *            name to set session
 	 */
 	public void setSessionName(String sessionName) {
-		if (sessionName == null) {
-			this.sessionName = "";
+		if (sessionName == null || sessionName.trim().length() == 0) {
+			this.sessionName = "Untitled";
 		} else {
 			this.sessionName = sessionName;
 		}
@@ -115,8 +115,6 @@ public class Session {
 
 		String durationString = String.format("%d:%02d:%02d", durationHours, durationMinutes, durationSeconds);
 
-		if(sessionName == null || sessionName.trim().length() == 0)
-			return dateFormat.format(dateStart) + " - " + durationString;
 		return dateFormat.format(dateStart) + " - " + durationString + " - " + this.getSessionName();
 	}
 
