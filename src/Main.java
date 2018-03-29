@@ -203,6 +203,8 @@ public class Main extends Application {
 
 		TextField sessionName = new TextField();
 		sessionName.setPrefSize(150, 5);
+		
+		invalidName.setFill(Color.RED);
 
 		// ====Define functionality====
 
