@@ -195,7 +195,7 @@ public class Main extends Application {
 		Text applicationListTitle = new Text("Application to Track");
 		Text logNameTitle = new Text("Set Session Name");
 		
-		Text invalidName = new Text("(Invalid name)");
+		Text invalidName = new Text("(Empty name)");
 
 		ComboBox<String> applicationList = new ComboBox<String>();
 		applicationList.setValue("NONE");
@@ -218,12 +218,11 @@ public class Main extends Application {
 				timeController.displayElapsedTimeInSeconds(timeModel);
 				enableAppTracking.setDisable(false);
 			}
+			saveButton.setDisable(false);
 			if (sessionName.getText().trim().length() != 0 && sessionName.getText() != null) {
-				saveButton.setDisable(false);
 				invalidName.setText("");
 			}else {
-				saveButton.setDisable(true);
-				invalidName.setText("(Invalid name)");
+				invalidName.setText("(Empty name)");
 			}
 		});
 
@@ -240,15 +239,12 @@ public class Main extends Application {
 		sessionName.setOnKeyReleased(a -> {
 			timeController.setSessionName(sessionName.getText());
 			if (saveButtonReady && sessionName.getText().trim().length() != 0 && sessionName.getText() != null) {
-				saveButton.setDisable(false);
 				invalidName.setText("");
 				
 			}else  if (sessionName.getText().trim().length() != 0 && sessionName.getText() != null){
-				saveButton.setDisable(true);
 				invalidName.setText("");
 			}else{
-				saveButton.setDisable(true);
-				invalidName.setText("(Invalid name)");
+				invalidName.setText("(Empty name)");
 			}
 		});
 
