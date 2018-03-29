@@ -243,7 +243,10 @@ public class Main extends Application {
 				saveButton.setDisable(false);
 				invalidName.setText("");
 				
-			}else {
+			}else  if (sessionName.getText().trim().length() != 0 && sessionName.getText() != null){
+				saveButton.setDisable(true);
+				invalidName.setText("");
+			}else{
 				saveButton.setDisable(true);
 				invalidName.setText("(Invalid name)");
 			}
