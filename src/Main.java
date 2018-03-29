@@ -32,7 +32,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-
 /**
  *
  *
@@ -48,6 +47,8 @@ public class Main extends Application {
 	private List<String> appList = new ArrayList<String>();
 
 	private String trackingApp = "NONE";
+	
+	private boolean saveButtonReady = false;
 
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
@@ -119,8 +120,8 @@ public class Main extends Application {
 	}
 
 	/**
-	 * Uses Powershell command to find a list of applications running processes
-	 * that also have a visible window. Updates the appList
+	 * Uses Powershell command to find a list of applications running processes that
+	 * also have a visible window. Updates the appList
 	 */
 	public void getAppWindows() {
 		while (true) {
@@ -146,19 +147,18 @@ public class Main extends Application {
 				input.close();
 				appList = fetchedList;
 
-				
 			} catch (Exception err) {
 				err.printStackTrace();
 			}
-			
-			if(!appList.contains(trackingApp)){
+
+			if (!appList.contains(trackingApp)) {
 				timeController.stopTime();
 			} else {
-				if(trackingApp != null && !trackingApp.equals("NONE")){
+				if (trackingApp != null && !trackingApp.equals("NONE")) {
 					timeController.startTime();
 				}
 			}
-			
+
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {
@@ -171,7 +171,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		// =====Setup Time Components=====
 		timeController = new TimeController(timeModel, timeView);
-		
+
 		// Set up Stages
 		Stage viewPreviousWindow = new Stage();
 		Stage viewMiniTimerWindow = new Stage();
@@ -179,7 +179,7 @@ public class Main extends Application {
 		// =====Create UI Elements====
 		timerText = new Text("0:00:00");
 		timerText.setFont(new Font(45));
-		
+
 		miniTimerText = new Text("0:00:00");
 		miniTimerText.setFont(new Font(45));
 
@@ -189,11 +189,13 @@ public class Main extends Application {
 		Button saveButton = new Button("Save");
 		saveButton.setFont(new Font(15));
 		saveButton.setDisable(true);
-		
+
 		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
 
 		Text applicationListTitle = new Text("Application to Track");
 		Text logNameTitle = new Text("Set Session Name");
+		
+		Text invalidName = new Text("(Invalid name)");
 
 		ComboBox<String> applicationList = new ComboBox<String>();
 		applicationList.setValue("NONE");
@@ -205,6 +207,7 @@ public class Main extends Application {
 		// ====Define functionality====
 
 		startButton.setOnAction(a -> {
+			saveButtonReady = true;
 			if (!timeModel.isStarted()) {
 				startButton.setText("Pause");
 				timeController.startTime();
@@ -215,7 +218,13 @@ public class Main extends Application {
 				timeController.displayElapsedTimeInSeconds(timeModel);
 				enableAppTracking.setDisable(false);
 			}
-			saveButton.setDisable(false);
+			if (sessionName.getText().trim().length() != 0 && sessionName.getText() != null) {
+				saveButton.setDisable(false);
+				invalidName.setText("");
+			}else {
+				saveButton.setDisable(true);
+				invalidName.setText("(Invalid name)");
+			}
 		});
 
 		saveButton.setOnAction(a -> {
@@ -227,22 +236,30 @@ public class Main extends Application {
 			sessionName.clear();
 			saveButton.setDisable(true);
 		});
-		
+
 		sessionName.setOnKeyReleased(a -> {
 			timeController.setSessionName(sessionName.getText());
+			if (saveButtonReady && sessionName.getText().trim().length() != 0 && sessionName.getText() != null) {
+				saveButton.setDisable(false);
+				invalidName.setText("");
+				
+			}else {
+				saveButton.setDisable(true);
+				invalidName.setText("(Invalid name)");
+			}
 		});
 
 		applicationList.setOnShowing(a -> {
-			if (!appList.contains(trackingApp)){
+			if (!appList.contains(trackingApp)) {
 				applicationList.setValue("NONE");
 			}
 			ObservableList<String> currentAppList = FXCollections
 					.observableArrayList(appList.subList(0, appList.size()));
 			applicationList.setItems(currentAppList);
 		});
-		
+
 		enableAppTracking.setOnAction(a -> {
-			if(enableAppTracking.isSelected()){
+			if (enableAppTracking.isSelected()) {
 				startButton.setDisable(true);
 				applicationList.setDisable(false);
 			} else {
@@ -255,11 +272,11 @@ public class Main extends Application {
 
 		applicationList.setOnAction(a -> {
 			trackingApp = applicationList.getValue();
-			if (trackingApp != "NONE"){
+			if (trackingApp != "NONE") {
 				saveButton.setDisable(false);
 			}
 		});
-		
+
 		// ====Menu Bar====
 		MenuBar menuBar = new MenuBar();
 		Menu menuWindow = new Menu("Window");
@@ -269,14 +286,14 @@ public class Main extends Application {
 		previousLogs.setOnAction(a -> {
 			previousLogWindow(viewPreviousWindow);
 		});
-		
+
 		miniTimer.setOnAction(a -> {
 			miniTimerWindow(viewMiniTimerWindow, primaryStage);
 		});
-		
+
 		menuWindow.getItems().addAll(previousLogs, miniTimer);
 		menuBar.getMenus().addAll(menuWindow);
-		
+
 		// ====Create====
 
 		primaryStage.setTitle("PunchClock");
@@ -290,14 +307,15 @@ public class Main extends Application {
 		controlButtons.setAlignment(Pos.CENTER);
 
 		HBox logNames = new HBox(10);
-		logNames.getChildren().addAll(logNameTitle, sessionName);
+		logNames.getChildren().addAll(logNameTitle, sessionName, invalidName);
 		logNames.setAlignment(Pos.CENTER);
 
 		VBox applicationSelect = new VBox(3);
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
-		verticalBox.getChildren().addAll(menuBar, timerText, logNames, controlButtons, enableAppTracking, applicationSelect);
+		verticalBox.getChildren().addAll(menuBar, timerText, logNames, controlButtons, enableAppTracking,
+				applicationSelect);
 		verticalBox.setAlignment(Pos.TOP_CENTER);
 
 		// ====Start Background Threads====
@@ -312,14 +330,14 @@ public class Main extends Application {
 			Platform.exit();
 		});
 	}
-	
+
 	/**
 	 * Shows the previous recorded sessions in the given Stage
 	 * 
-	 * @param window 
-	 * 			Stage to show the sessions in
+	 * @param window
+	 *            Stage to show the sessions in
 	 */
-	private void previousLogWindow(Stage window){
+	private void previousLogWindow(Stage window) {
 		Stage previousLogWindow = window;
 		previousLogWindow.setTitle("Previous Session Logs");
 
@@ -364,11 +382,10 @@ public class Main extends Application {
 				// System.out.println(logs.getSelectionModel().getSelectedIndex());
 			}
 		});
-		
+
 		Button directoryExportButton = new Button("Change Export Directory");
 		directoryExportButton.setText("Change Export Directory");
 
-		
 		// edit button handler
 		editButton.setOnAction(b -> {
 			Stage editLogWindow = new Stage();
@@ -377,10 +394,10 @@ public class Main extends Application {
 
 			Text editTitle = new Text("Edit Session");
 			editTitle.setFont(new Font(18));
-			
+
 			Text editSessionNameTitle = new Text("Set Session Name:");
 			editSessionNameTitle.setFont(new Font(15));
-			
+
 			Text hoursTitle = new Text("Hours");
 			Text minutesTitle = new Text("Minutes");
 			Text secondsTitle = new Text("Seconds");
@@ -391,14 +408,14 @@ public class Main extends Application {
 			int initialHours = editingSession.getDuration().get(0);
 
 			// creating spinners
-			SpinnerValueFactory<Integer> hourValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0,
-					23, initialHours);
+			SpinnerValueFactory<Integer> hourValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23,
+					initialHours);
 			hourValueFactory.setWrapAround(true);
-			SpinnerValueFactory<Integer> minuteValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0,
-					59, initialMinutes);
+			SpinnerValueFactory<Integer> minuteValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59,
+					initialMinutes);
 			minuteValueFactory.setWrapAround(true);
-			SpinnerValueFactory<Integer> secondValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0,
-					59, initialSeconds);
+			SpinnerValueFactory<Integer> secondValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59,
+					initialSeconds);
 			secondValueFactory.setWrapAround(true);
 
 			Spinner<Integer> hourSpinner = new Spinner<Integer>(hourValueFactory);
@@ -409,19 +426,19 @@ public class Main extends Application {
 
 			Spinner<Integer> secondSpinner = new Spinner<Integer>(secondValueFactory);
 			secondSpinner.setPrefWidth(50);
-			
-			//creating text field for edit session name
-			TextField editSessionName = new TextField(editingSession.getSessionName()); //logs.getSelectionModel()
+
+			// creating text field for edit session name
+			TextField editSessionName = new TextField(editingSession.getSessionName()); // logs.getSelectionModel()
 			editSessionName.setPrefSize(150, 5);
 
 			// confirm button and its handler
 			Button confirmEdit = new Button("Confirm Edit");
 
 			confirmEdit.setOnAction(c -> {
-				//changing the session name 
+				// changing the session name
 				editingSession.setSessionName(editSessionName.getText());
-				
-				//setting the spinner value to the session 
+
+				// setting the spinner value to the session
 				long newDuration = hourSpinner.getValue() * 3600000 + minuteSpinner.getValue() * 60000
 						+ secondSpinner.getValue() * 1000;
 
@@ -437,7 +454,7 @@ public class Main extends Application {
 			// setting up the layout for editLogWindow
 			VBox layout = new VBox(25);
 			layout.setAlignment(Pos.CENTER);
-			
+
 			HBox editSessionBox = new HBox(10);
 			editSessionBox.getChildren().addAll(editSessionNameTitle, editSessionName);
 			editSessionBox.setAlignment(Pos.CENTER);
@@ -461,15 +478,15 @@ public class Main extends Application {
 			editLogWindow.show();
 
 		});
-		
+
 		directoryExportButton.setOnAction(b -> {
 			DirectoryChooser chooser = new DirectoryChooser();
 			chooser.setTitle("Select Directory");
 			File defaultDirectory = new File("output");
 			chooser.setInitialDirectory(defaultDirectory);
 			File selectedDirectory = chooser.showDialog(previousLogWindow);
-			if(selectedDirectory != null) {
-			timeModel.setDirectory(selectedDirectory.getAbsolutePath());
+			if (selectedDirectory != null) {
+				timeModel.setDirectory(selectedDirectory.getAbsolutePath());
 			}
 		});
 
@@ -506,7 +523,8 @@ public class Main extends Application {
 		deleteEditButtons.setAlignment(Pos.CENTER);
 		dates.getChildren().addAll(startDate, endDate);
 		dates.setAlignment(Pos.CENTER);
-		layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton, directoryExportButton);
+		layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton,
+				directoryExportButton);
 		layout.setAlignment(Pos.CENTER);
 		previousLogWindow.setScene(new Scene(layout, 300, 400));
 		previousLogWindow.show();
@@ -515,26 +533,26 @@ public class Main extends Application {
 	/**
 	 * Shows a mini timer window with only the timer.
 	 * 
-	 * @param window 
-	 * 			The stage for the minitimer
+	 * @param window
+	 *            The stage for the minitimer
 	 * @param primaryWindow
-	 * 			The main stage
+	 *            The main stage
 	 */
-	private void miniTimerWindow(Stage window, Stage primaryWindow){
+	private void miniTimerWindow(Stage window, Stage primaryWindow) {
 		Stage miniTimerWindow = window;
 		VBox miniLayout = new VBox(5);
 		Scene miniScene = new Scene(miniLayout, 200, 60);
-		
+
 		miniLayout.setAlignment(Pos.CENTER);
 		miniLayout.getChildren().addAll(miniTimerText);
-		
+
 		miniTimerWindow.setResizable(false);
 		miniTimerWindow.setAlwaysOnTop(true);
 		miniTimerWindow.setTitle("Timer");
 		miniTimerWindow.setScene(miniScene);
-		
+
 		miniTimerWindow.show();
-		
+
 		miniTimerWindow.setOnCloseRequest(a -> {
 			primaryWindow.requestFocus();
 		});
