@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,6 +13,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -23,6 +29,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -296,12 +303,103 @@ public class Main extends Application {
 		MenuBar menuBar = new MenuBar();
 		Menu menuWindow = new Menu("Window");
 		MenuItem previousLogs = new MenuItem("View Previous Logs");
+		MenuItem graphs = new MenuItem("View Graphs");
 		MenuItem miniTimer = new MenuItem("Show MiniTimer");
 		
 		miniTimerWindow(viewMiniTimerWindow, primaryStage);
 		
 		previousLogs.setOnAction(a -> {
 			previousLogWindow(viewPreviousWindow);
+		});
+		
+		graphs.setOnAction(a -> {
+			Stage previousLogWindow = new Stage();
+			previousLogWindow.setTitle("Previous Session Logs(Graph)");
+
+			// Add a text title inside the window
+			Text title = new Text("Previous Session Logs(Graph)");
+			title.setFont(new Font(18));
+			
+			final NumberAxis xAxis = new NumberAxis();
+	        final CategoryAxis yAxis = new CategoryAxis();
+	        final BarChart<NumberAxis, CategoryAxis> bc = 
+	            new BarChart(xAxis,yAxis);
+	        bc.setTitle("Session History");
+	        bc.setLegendVisible(false);
+	        xAxis.setLabel("Duration(Seconds)");  
+	        xAxis.setTickLabelRotation(90);
+	        yAxis.setLabel("Session");
+	        
+			ObservableList<Series<NumberAxis, CategoryAxis>> data = getSessionsGraphData(timeController.getSessions());
+			
+			bc.setData(data);
+			
+			for (Series<NumberAxis, CategoryAxis> series: bc.getData()){
+	            for (XYChart.Data<NumberAxis, CategoryAxis> item: series.getData()){
+	                item.getNode().setOnMousePressed((MouseEvent event) -> {
+	                    System.out.println(String.valueOf(item.getYValue()));
+	                    Session matchingSession = timeController.getSessionByName(String.valueOf(item.getYValue()));
+	                    if(matchingSession != null) {
+	                    	TextInputDialog dialog = new TextInputDialog();
+	                    	dialog.initStyle(StageStyle.UTILITY);
+	                    	dialog.setTitle("Text Input Dialog");
+	                    	dialog.setHeaderText("Look, a Text Input Dialog");
+	                    	dialog.setContentText("Please enter your name:");
+	                    	Optional<String> result = dialog.showAndWait();
+	                    	result.ifPresent(name -> matchingSession.setSessionName(name));
+	                    	//Name will need to be re-writen again
+	                    	//https://stackoverflow.com/questions/16880115/javafx-2-2-how-to-force-a-redraw-update-of-a-listview/25962110
+	                    	this.forceListRefreshOn(data,timeController.getSessions(),bc);
+	                    }
+	                    else {
+	                    	System.err.println("Error: Session matching name: " + item.getYValue().toString() + ": was not found.");
+	                    }
+	                });
+	            }
+	        }
+
+			CheckBox enableDateRange = new CheckBox("Export from a date range");
+
+			DatePicker startDate = new DatePicker();
+			startDate.setTooltip(new Tooltip("Start Date"));
+			startDate.setDisable(true);
+			startDate.setPrefWidth(100);
+
+			DatePicker endDate = new DatePicker();
+			endDate.setTooltip(new Tooltip("End Date"));
+			endDate.setDisable(true);
+			endDate.setPrefWidth(100);
+
+			// Add a button to export the logs
+			Button exportButton = new Button("Export Logs");
+			
+			//-----------------------------------
+			
+			Text instructions = new Text("Click on bar to edit name of session");
+			
+			//-----------------------------------
+			
+			// Export Button Handler
+			exportButton.setOnAction(b -> {
+				//handleExport(enableDateRange,startDate);
+			});
+			
+			//-----------------------------------
+
+			enableDateRange.setOnAction(b -> {
+				startDate.setDisable(!enableDateRange.isSelected());
+				endDate.setDisable(!enableDateRange.isSelected());
+			});
+			
+			// Make a layout, and add everything to it, centered
+			VBox layout = new VBox(10);
+			HBox dates = new HBox(15);
+			dates.getChildren().addAll(startDate, endDate);
+			dates.setAlignment(Pos.CENTER);
+			layout.getChildren().addAll(title, bc,instructions,enableDateRange, dates, exportButton);
+			layout.setAlignment(Pos.CENTER);
+			previousLogWindow.setScene(new Scene(layout, 600, 600));
+			previousLogWindow.show();
 		});
 
 		miniTimer.setOnAction(a -> {
@@ -325,7 +423,7 @@ public class Main extends Application {
 			}		
 		});
 
-		menuWindow.getItems().addAll(previousLogs, miniTimer);
+		menuWindow.getItems().addAll(previousLogs, graphs, miniTimer);
 		menuBar.getMenus().addAll(menuWindow);
 
 		// ====Create====
@@ -627,5 +725,53 @@ public class Main extends Application {
 			miniTimerText.setFill(c);
 		}
 		timerText.setFill(c);
+	}
+	
+	private ObservableList<Series<NumberAxis, CategoryAxis>> getSessionsGraphData(List<Session> sessions) {
+	    ObservableList<XYChart.Series<NumberAxis,CategoryAxis>> answer = FXCollections.observableArrayList();
+        
+        XYChart.Series<NumberAxis,CategoryAxis> series1 = new XYChart.Series<NumberAxis,CategoryAxis>();
+        series1.setName("Sesson Duration");  
+        
+        for(Session session : sessions) {
+        	series1.getData().add(new XYChart.Data(session.getTotalTime() / 1000, session.getSessionName()));
+        }
+        
+        answer.add(series1);
+        
+        return answer;
+	}
+	
+	private <T> void forceListRefreshOn(ObservableList<Series<NumberAxis, CategoryAxis>> data, List<Session> list, BarChart<NumberAxis, CategoryAxis> bc) {
+	    ObservableList<Series<NumberAxis, CategoryAxis>> items = data;
+	    data.clear();
+	    
+	    data = getSessionsGraphData(timeController.getSessions());
+		
+		bc.setData(data);
+		
+		for (Series<NumberAxis, CategoryAxis> series: bc.getData()){
+            for (XYChart.Data<NumberAxis, CategoryAxis> item: series.getData()){
+                item.getNode().setOnMousePressed(new EventHandler<MouseEvent>() {
+                	//https://stackoverflow.com/questions/5107158/how-to-pass-parameters-to-anonymous-class
+                	private ObservableList<Series<NumberAxis, CategoryAxis>> anonVar;
+                    public void handle(MouseEvent me) {
+                    	System.out.println(String.valueOf(item.getYValue()));
+                        Session matchingSession = timeController.getSessionByName(String.valueOf(item.getYValue()));
+                        if(matchingSession != null) {
+                        	matchingSession.setSessionName("Test");
+                        	forceListRefreshOn(anonVar,timeController.getSessions(),bc);
+                        }
+                        else {
+                        	System.err.println("Error: Session matching name: " + item.getYValue().toString() + ": was not found.");
+                        }
+                    }
+                    private EventHandler<MouseEvent> init(ObservableList<Series<NumberAxis, CategoryAxis>> data){
+                        anonVar = data;
+                        return this;
+                    }
+                }.init(data));
+            }
+        }
 	}
 }

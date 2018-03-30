@@ -158,5 +158,23 @@ public class TimeController {
 	public boolean writeToReadableFile(LocalDate start, LocalDate end) {
 		return timeModel.writeToReadableFile(start, end);
 	}
+	
+	/**
+	 * Get a list containing Session objects
+	 * 
+	 * @return The list containing the Session objects
+	 */
+	public List<Session> getSessions() {
+		return timeModel.getSessions();
+	}
+	
+	/**
+     * Find and return a session by its name if it exists
+     * @param sessionName
+     * @return Session object with name matching sessionName if exists, null otherwise
+     */
+	 public Session getSessionByName(String sessionName) { 
+		 return timeModel.getSessionByName(sessionName);
+	 }
 
 }

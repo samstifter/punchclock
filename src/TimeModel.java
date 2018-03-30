@@ -464,4 +464,18 @@ public class TimeModel {
 	public void setCurrentSession(Session currSession) {
 		this.currSession = currSession;
 	}
+	
+	  /**
+     * Find and return a session by its name if it exists
+     * @param sessionName
+     * @return Session object with name matching sessionName if exists, null otherwise
+     */
+    public Session getSessionByName(String sessionName) {
+    	for(Session session : this.sessions) {
+    		if(session.getSessionName().equals(sessionName)) {
+    			return session;
+    		}
+    	}
+    	return null;
+    }
 }
