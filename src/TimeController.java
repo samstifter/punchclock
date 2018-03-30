@@ -62,6 +62,10 @@ public class TimeController {
 		timeModel.addSession(timeModel.getCurrentSession());
 		timeModel.resetTime();
 	}
+	
+	public void resetTime(){
+		timeModel.resetTime();
+	}
 
 	/**
 	 * Get the current session time in milliseconds

@@ -171,6 +171,7 @@ public class Main extends Application {
 
 			if (!appList.contains(trackingApp)) {
 				timeController.stopTime();
+				
 			} else {
 				if (trackingApp != null && !trackingApp.equals("NONE")) {
 					timeController.startTime();
@@ -207,6 +208,10 @@ public class Main extends Application {
 		Button saveButton = new Button("Save");
 		saveButton.setFont(new Font(15));
 		saveButton.setDisable(true);
+		
+		Button clearButton = new Button("Clear");
+		clearButton.setFont(new Font(15));
+		clearButton.setDisable(true);
 
 		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
 
@@ -241,6 +246,7 @@ public class Main extends Application {
 				enableAppTracking.setDisable(false);
 			}
 			saveButton.setDisable(false);
+			clearButton.setDisable(false);
 			if (sessionName.getText().trim().length() != 0 && sessionName.getText() != null) {
 				invalidName.setText("");
 			}else {
@@ -257,6 +263,18 @@ public class Main extends Application {
 			timeController.saveSessions();
 			sessionName.clear();
 			saveButton.setDisable(true);
+			clearButton.setDisable(true);
+		});
+		
+		clearButton.setOnAction(a -> {
+			this.setUIColor(Color.BLACK,"black");
+			startButton.setText("Start");
+			applicationList.setValue("NONE");
+			timeController.stopTime();
+			timeController.resetTime();
+			sessionName.clear();
+			saveButton.setDisable(true);
+			clearButton.setDisable(true);
 		});
 
 		sessionName.setOnKeyReleased(a -> {
@@ -296,6 +314,7 @@ public class Main extends Application {
 			trackingApp = applicationList.getValue();
 			if (trackingApp != "NONE") {
 				saveButton.setDisable(false);
+				clearButton.setDisable(false);
 			}
 		});
 
@@ -406,7 +425,7 @@ public class Main extends Application {
 		scene.setFill(Color.OLDLACE);
 
 		HBox controlButtons = new HBox(40);
-		controlButtons.getChildren().addAll(startButton, saveButton);
+		controlButtons.getChildren().addAll(startButton, saveButton, clearButton);
 		controlButtons.setAlignment(Pos.CENTER);
 
 		HBox logNames = new HBox(10);
