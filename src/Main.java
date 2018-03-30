@@ -171,10 +171,11 @@ public class Main extends Application {
 
 			if (!appList.contains(trackingApp)) {
 				timeController.stopTime();
-				
+				this.setUIColor(Color.BLACK,"black");
 			} else {
 				if (trackingApp != null && !trackingApp.equals("NONE")) {
 					timeController.startTime();
+					this.setUIColor(Color.GREEN,"green");
 				}
 			}
 
@@ -307,6 +308,7 @@ public class Main extends Application {
 				timeController.stopTime();
 				startButton.setDisable(false);
 				applicationList.setDisable(true);
+				this.setUIColor(Color.BLACK,"black");
 			}
 		});
 
@@ -315,6 +317,9 @@ public class Main extends Application {
 			if (trackingApp != "NONE") {
 				saveButton.setDisable(false);
 				clearButton.setDisable(false);
+			} else {
+				timeController.stopTime();
+				this.setUIColor(Color.BLACK,"black");
 			}
 		});
 
