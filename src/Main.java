@@ -314,10 +314,10 @@ public class Main extends Application {
 		
 		graphs.setOnAction(a -> {
 			Stage previousLogWindow = new Stage();
-			previousLogWindow.setTitle("Previous Session Logs(Graph)");
+			previousLogWindow.setTitle("Previous Sessions");
 
 			// Add a text title inside the window
-			Text title = new Text("Previous Session Logs(Graph)");
+			Text title = new Text("Previous Sessions");
 			title.setFont(new Font(18));
 			
 			final NumberAxis xAxis = new NumberAxis();
@@ -357,21 +357,6 @@ public class Main extends Application {
 	                });
 	            }
 	        }
-
-			CheckBox enableDateRange = new CheckBox("Export from a date range");
-
-			DatePicker startDate = new DatePicker();
-			startDate.setTooltip(new Tooltip("Start Date"));
-			startDate.setDisable(true);
-			startDate.setPrefWidth(100);
-
-			DatePicker endDate = new DatePicker();
-			endDate.setTooltip(new Tooltip("End Date"));
-			endDate.setDisable(true);
-			endDate.setPrefWidth(100);
-
-			// Add a button to export the logs
-			Button exportButton = new Button("Export Logs");
 			
 			//-----------------------------------
 			
@@ -379,24 +364,10 @@ public class Main extends Application {
 			
 			//-----------------------------------
 			
-			// Export Button Handler
-			exportButton.setOnAction(b -> {
-				//handleExport(enableDateRange,startDate);
-			});
-			
-			//-----------------------------------
-
-			enableDateRange.setOnAction(b -> {
-				startDate.setDisable(!enableDateRange.isSelected());
-				endDate.setDisable(!enableDateRange.isSelected());
-			});
 			
 			// Make a layout, and add everything to it, centered
 			VBox layout = new VBox(10);
-			HBox dates = new HBox(15);
-			dates.getChildren().addAll(startDate, endDate);
-			dates.setAlignment(Pos.CENTER);
-			layout.getChildren().addAll(title, bc,instructions,enableDateRange, dates, exportButton);
+			layout.getChildren().addAll(title, bc,instructions);
 			layout.setAlignment(Pos.CENTER);
 			previousLogWindow.setScene(new Scene(layout, 600, 600));
 			previousLogWindow.show();
