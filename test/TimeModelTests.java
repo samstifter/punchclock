@@ -6,7 +6,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class TimeModelUTest {
+public class TimeModelTests {
 
     TimeModel timeModel;
     Session currSession;
