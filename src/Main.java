@@ -8,7 +8,9 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -22,6 +24,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -30,7 +33,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  *
@@ -49,6 +54,11 @@ public class Main extends Application {
 	private String trackingApp = "NONE";
 	
 	private boolean saveButtonReady = false;
+	
+	private double xOffset = 0;
+    private double yOffset = 0;
+    VBox miniLayout = new VBox(5);
+    boolean miniTimerVisible = false;
 
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
@@ -95,6 +105,7 @@ public class Main extends Application {
 
 						timerText.setText(durationString);
 						miniTimerText.setText(durationString);
+						//miniTimerText.setFill(Color.GREEN);
 					}
 				});
 
@@ -211,10 +222,12 @@ public class Main extends Application {
 		startButton.setOnAction(a -> {
 			saveButtonReady = true;
 			if (!timeModel.isStarted()) {
+				this.setUIColor(Color.GREEN,"green");
 				startButton.setText("Pause");
 				timeController.startTime();
 				enableAppTracking.setDisable(true);
 			} else {
+				this.setUIColor(Color.BLACK,"black");
 				startButton.setText("Start");
 				timeController.stopTime();
 				timeController.displayElapsedTimeInSeconds(timeModel);
@@ -229,6 +242,7 @@ public class Main extends Application {
 		});
 
 		saveButton.setOnAction(a -> {
+			this.setUIColor(Color.BLACK,"black");
 			startButton.setText("Start");
 			applicationList.setValue("NONE");
 			timeController.stopTime();
@@ -282,14 +296,33 @@ public class Main extends Application {
 		MenuBar menuBar = new MenuBar();
 		Menu menuWindow = new Menu("Window");
 		MenuItem previousLogs = new MenuItem("View Previous Logs");
-		MenuItem miniTimer = new MenuItem("MiniTimer");
-
+		MenuItem miniTimer = new MenuItem("Show MiniTimer");
+		
+		miniTimerWindow(viewMiniTimerWindow, primaryStage);
+		
 		previousLogs.setOnAction(a -> {
 			previousLogWindow(viewPreviousWindow);
 		});
 
 		miniTimer.setOnAction(a -> {
-			miniTimerWindow(viewMiniTimerWindow, primaryStage);
+			if (miniTimerVisible) {
+				miniTimerVisible = false;
+				miniTimer.setText("Show MiniTimer");
+				viewMiniTimerWindow.hide();
+			}
+			else {
+				miniTimerVisible = true;
+				viewMiniTimerWindow.show();
+				miniTimer.setText("Hide MiniTimer");
+				
+				//Set Color Only when window is visible
+				if(timeModel.isStarted()) {
+					this.setUIColor(Color.GREEN,"green");
+				}
+				else {
+					this.setUIColor(Color.BLACK,"black");
+				}
+			}		
 		});
 
 		menuWindow.getItems().addAll(previousLogs, miniTimer);
@@ -532,7 +565,7 @@ public class Main extends Application {
 	}
 
 	/**
-	 * Shows a mini timer window with only the timer.
+	 * Creates but does not show a mini timer window with only the timer.
 	 * 
 	 * @param window
 	 *            The stage for the minitimer
@@ -541,8 +574,9 @@ public class Main extends Application {
 	 */
 	private void miniTimerWindow(Stage window, Stage primaryWindow) {
 		Stage miniTimerWindow = window;
-		VBox miniLayout = new VBox(5);
-		Scene miniScene = new Scene(miniLayout, 200, 60);
+		miniTimerWindow.initStyle(StageStyle.UNDECORATED);
+		int height = 60, width = 200;
+		Scene miniScene = new Scene(miniLayout, width, height);
 
 		miniLayout.setAlignment(Pos.CENTER);
 		miniLayout.getChildren().addAll(miniTimerText);
@@ -550,12 +584,48 @@ public class Main extends Application {
 		miniTimerWindow.setResizable(false);
 		miniTimerWindow.setAlwaysOnTop(true);
 		miniTimerWindow.setTitle("Timer");
+		
+		Rectangle2D rect = Screen.getPrimary().getVisualBounds();
+		
+		miniTimerWindow.setX(rect.getMinX() + rect.getWidth() - width);
+		miniTimerWindow.setY(rect.getMinY() + rect.getHeight() - height);
+		
+		
+		miniLayout.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset = event.getSceneX();
+                yOffset = event.getSceneY();
+            }
+        });
+		miniLayout.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+            	window.setX(event.getScreenX() - xOffset);
+                window.setY(event.getScreenY() - yOffset);
+            }
+        });
+		
+		
 		miniTimerWindow.setScene(miniScene);
 
-		miniTimerWindow.show();
+		//miniTimerWindow.show();
 
 		miniTimerWindow.setOnCloseRequest(a -> {
 			primaryWindow.requestFocus();
 		});
+	}
+	
+	private void setUIColor(Color c, String color) {
+		if (miniTimerVisible) {
+			miniLayout.setStyle("-fx-padding: 0;" + 
+	                "-fx-border-style: solid inside;" + 
+	                "-fx-border-width: 5;" +
+	                "-fx-border-insets: 0;" + 
+	                "-fx-border-radius: 0;" + 
+	                "-fx-border-color: " + color + ";");
+			miniTimerText.setFill(c);
+		}
+		timerText.setFill(c);
 	}
 }
