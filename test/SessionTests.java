@@ -28,7 +28,7 @@ public class SessionTests {
 	@Test
 	public void testEmptyContructors() {
 		session = new Session();
-		assertNull(session.getSessionName());
+		assertTrue(session.getSessionName().equals(""));
 		assertTrue(session.getTimePairList().isEmpty());
 		assertEquals(0, session.getTotalTime());
 	}
@@ -46,7 +46,7 @@ public class SessionTests {
 	public void testSessionNaming() {
 		session = new Session();
 		String name = "testing";
-		assertNull(session.getSessionName());
+		assertTrue(session.getSessionName().equals(""));
 		session.setSessionName(name);
 		assertEquals(name, session.getSessionName());
 	}
