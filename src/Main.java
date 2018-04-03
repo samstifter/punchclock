@@ -21,6 +21,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -197,7 +198,6 @@ public class Main extends Application {
 		timeController = new TimeController(timeModel, timeView);
 
 		// Set up Stages
-		Stage viewPreviousWindow = new Stage();
 		Stage viewMiniTimerWindow = new Stage();
 
 		// =====Create UI Elements====
@@ -337,11 +337,12 @@ public class Main extends Application {
 		miniTimerWindow(viewMiniTimerWindow, primaryStage);
 		
 		previousLogs.setOnAction(a -> {
-			previousLogWindow(viewPreviousWindow);
+			previousLogWindow();
 		});
 		
 		graphs.setOnAction(a -> {
 			Stage previousLogWindow = new Stage();
+			previousLogWindow.initModality(Modality.APPLICATION_MODAL);
 			previousLogWindow.setTitle("Previous Sessions");
 
 			// Add a text title inside the window
@@ -350,8 +351,7 @@ public class Main extends Application {
 			
 			final NumberAxis xAxis = new NumberAxis();
 	        final CategoryAxis yAxis = new CategoryAxis();
-	        final BarChart<NumberAxis, CategoryAxis> bc = 
-	            new BarChart(xAxis,yAxis);
+	        final BarChart<NumberAxis, CategoryAxis> bc = new BarChart(xAxis,yAxis);
 	        bc.setTitle("Session History");
 	        bc.setLegendVisible(false);
 	        xAxis.setLabel("Duration(Seconds)");  
@@ -370,9 +370,9 @@ public class Main extends Application {
 	                    if(matchingSession != null) {
 	                    	TextInputDialog dialog = new TextInputDialog();
 	                    	dialog.initStyle(StageStyle.UTILITY);
-	                    	dialog.setTitle("Text Input Dialog");
-	                    	dialog.setHeaderText("Look, a Text Input Dialog");
-	                    	dialog.setContentText("Please enter your name:");
+	                    	dialog.setTitle("Edit Session Name");
+	                    	dialog.setHeaderText("Edit Session Name");
+	                    	dialog.setContentText("New Session Name:");
 	                    	Optional<String> result = dialog.showAndWait();
 	                    	result.ifPresent(name -> matchingSession.setSessionName(name));
 	                    	//Name will need to be re-writen again
@@ -477,8 +477,9 @@ public class Main extends Application {
 	 * @param window
 	 *            Stage to show the sessions in
 	 */
-	private void previousLogWindow(Stage window) {
-		Stage previousLogWindow = window;
+	private void previousLogWindow() {
+		Stage previousLogWindow = new Stage();
+		previousLogWindow.initModality(Modality.APPLICATION_MODAL);
 		previousLogWindow.setTitle("Previous Session Logs");
 
 		// Add a text title inside the window
@@ -633,11 +634,17 @@ public class Main extends Application {
 		// delete button handler
 		deleteButton.setOnAction(b -> {
 			int logIndex = (logs.getSelectionModel().getSelectedIndex());
-			timeController.deleteSession(logIndex);
-			logs.setItems(FXCollections.observableArrayList(timeModel.getFormattedSessionList()));
-			deleteButton.setDisable(true);
-			editButton.setDisable(true);
-			timeController.saveSessions();
+			Alert deleteAlert = new Alert(AlertType.CONFIRMATION, "Are you sure you want to delete this session?");
+			deleteAlert.setHeaderText("Delete Confirmation");
+			deleteAlert.showAndWait().ifPresent(response -> {
+				if (response == ButtonType.OK) {
+					timeController.deleteSession(logIndex);
+					logs.setItems(FXCollections.observableArrayList(timeModel.getFormattedSessionList()));
+					deleteButton.setDisable(true);
+					editButton.setDisable(true);
+					timeController.saveSessions();
+				}
+			});
 		});
 
 		// Export Button Handler
