@@ -18,6 +18,8 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -49,9 +51,9 @@ import javafx.stage.StageStyle;
  *
  */
 public class Main extends Application {
-	static TimeModel timeModel;
-	static TimeView timeView;
-	static TimeController timeController;
+	private static TimeModel timeModel;
+	private static TimeView timeView;
+	private static TimeController timeController;
 
 	private Text timerText;
 	private Text miniTimerText;
@@ -61,16 +63,18 @@ public class Main extends Application {
 	private String trackingApp = "NONE";
 	
 	private boolean saveButtonReady = false;
+	private static String osVersion;
 	
 	private double xOffset = 0;
     private double yOffset = 0;
-    VBox miniLayout = new VBox(5);
-    boolean miniTimerVisible = false;
+    private VBox miniLayout = new VBox(5);
+    private boolean miniTimerVisible = false;
 
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
 		timeView = new TimeView();
 		timeModel.loadSavedSessions();
+		osVersion = System.getProperty("os.name");
 		launch(args);
 	}
 
@@ -445,10 +449,19 @@ public class Main extends Application {
 				applicationSelect);
 		verticalBox.setAlignment(Pos.TOP_CENTER);
 
-		// ====Start Background Threads====
+		// ====Start Background Thread for Timer====
 		startUpdateCurrentSessionVisibleTime();
-		startGetAppWindows();
-
+		
+		// Check if OS is windows
+		if (osVersion.equals("Windows 10")) {
+			startGetAppWindows();
+		} else {
+			Alert osAlert = new Alert(AlertType.WARNING, "Application Tracking is only compatible with Windows 10. Application tracking will not be enabled.");
+			osAlert.showAndWait();
+			enableAppTracking.setDisable(true);
+		}
+		
+		
 		primaryStage.setScene(scene);
 		primaryStage.show();
 
