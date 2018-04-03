@@ -1,9 +1,19 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -63,7 +73,11 @@ public class Main extends Application {
 
 	private String trackingApp = "NONE";
 	
+	private String newDirPath = "output";
+	
 	private boolean saveButtonReady = false;
+	private boolean showAppTrackingHelp = true;
+	private boolean showAppTrackingError = false;
 	private static String osVersion;
 	
 	private double xOffset = 0;
@@ -74,7 +88,6 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		timeModel = new TimeModel();
 		timeView = new TimeView();
-		timeModel.loadSavedSessions();
 		osVersion = System.getProperty("os.name");
 		launch(args);
 	}
@@ -82,7 +95,7 @@ public class Main extends Application {
 	/**
 	 * Starts a new thread to update the time in the window
 	 */
-	public void startUpdateCurrentSessionVisibleTime() {
+	private void startUpdateCurrentSessionVisibleTime() {
 		Runnable task = new Runnable() {
 			public void run() {
 				updateCurrentSessionVisibleTime();
@@ -96,7 +109,7 @@ public class Main extends Application {
 	/**
 	 * This is a background process that continuously updates the visible timer
 	 */
-	public void updateCurrentSessionVisibleTime() {
+	private void updateCurrentSessionVisibleTime() {
 		while (true) {
 			try {
 				Platform.runLater(new Runnable() {
@@ -123,7 +136,7 @@ public class Main extends Application {
 
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				return;
 			}
 		}
 	}
@@ -131,7 +144,7 @@ public class Main extends Application {
 	/**
 	 * Starts a new thread to get the list of currently running applications
 	 */
-	public void startGetAppWindows() {
+	private void startGetAppWindows() {
 		Runnable task = new Runnable() {
 			public void run() {
 				getAppWindows();
@@ -146,10 +159,11 @@ public class Main extends Application {
 	 * Uses Powershell command to find a list of applications running processes that
 	 * also have a visible window. Updates the appList
 	 */
-	public void getAppWindows() {
+	private void getAppWindows() {
 		while (true) {
-			List<String> fetchedList = null;
-			String listCommand = "powershell -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
+			List<String> fetchedList = new ArrayList<String>();
+			fetchedList.add("NONE");
+			String listCommand = "powershel -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
 			try {
 				String line;
 				int outLen = 79;
@@ -158,8 +172,6 @@ public class Main extends Application {
 				line = input.readLine();
 				line = input.readLine();
 				line = input.readLine();
-				fetchedList = new ArrayList<String>();
-				fetchedList.add("NONE");
 				while (line != null && outLen > 0) {
 					line = input.readLine().trim().toLowerCase();
 					outLen = line.length();
@@ -168,10 +180,12 @@ public class Main extends Application {
 					}
 				}
 				input.close();
-				appList = fetchedList;
+				appList = fetchedList.subList(0, fetchedList.size());
 
 			} catch (Exception err) {
-				err.printStackTrace();
+				// Unable to run the powershell
+				showAppTrackingError = true;
+				return;
 			}
 
 			if (!appList.contains(trackingApp)) {
@@ -186,8 +200,8 @@ public class Main extends Application {
 
 			try {
 				Thread.sleep(1000);
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// Thread is interrupted, just continue as normal. 
 			}
 		}
 	}
@@ -233,6 +247,9 @@ public class Main extends Application {
 		sessionName.setPrefSize(150, 5);
 		
 		invalidName.setFill(Color.RED);
+		
+		Alert fileWriteAlert = new Alert(AlertType.ERROR, "File was unable to be written.");
+		fileWriteAlert.setHeaderText("File Save Error");
 
 		// ====Define functionality====
 
@@ -265,7 +282,10 @@ public class Main extends Application {
 			applicationList.setValue("NONE");
 			timeController.stopTime();
 			timeController.endCurrentSession();
-			timeController.saveSessions();
+			if (!saveSessions()) {
+				fileWriteAlert.showAndWait();
+				return;
+			}
 			sessionName.clear();
 			saveButton.setDisable(true);
 			clearButton.setDisable(true);
@@ -299,20 +319,30 @@ public class Main extends Application {
 				applicationList.setValue("NONE");
 			}
 			ObservableList<String> currentAppList = FXCollections
-					.observableArrayList(appList.subList(0, appList.size()));
+					.observableArrayList(appList);
 			applicationList.setItems(currentAppList);
 		});
 
 		enableAppTracking.setOnAction(a -> {
 			if (enableAppTracking.isSelected()) {
-				Alert appTrackingInfo = new Alert(AlertType.INFORMATION, 
-						"Application tracking will keep the timer running as long as the selected application is running. " + 
-						"Re-opening the appplication, as long as it is still selected in the dropdown, will start the timer again.");
-				appTrackingInfo.setHeaderText("Application Tracking");
-				appTrackingInfo.setTitle("Application Tracking Info");
-				appTrackingInfo.showAndWait();
-				startButton.setDisable(true);
-				applicationList.setDisable(false);
+				if (showAppTrackingError) {
+					Alert appTrackingError = new Alert(AlertType.ERROR, "Application tracking could not be started. App tracking is disabled.");
+					appTrackingError.showAndWait();
+					enableAppTracking.setDisable(true);
+					enableAppTracking.setSelected(false);
+				} else {
+					if (showAppTrackingHelp) {
+						Alert appTrackingInfo = new Alert(AlertType.INFORMATION, 
+								"Application tracking will keep the timer running as long as the selected application is running. " + 
+								"Re-opening the appplication, as long as it is still selected in the dropdown, will start the timer again.");
+						appTrackingInfo.setHeaderText("Application Tracking");
+						appTrackingInfo.setTitle("Application Tracking Info");
+						appTrackingInfo.showAndWait();
+						showAppTrackingHelp = false;
+					}
+					startButton.setDisable(true);
+					applicationList.setDisable(false);
+				}
 			} else {
 				applicationList.setValue("NONE");
 				timeController.stopTime();
@@ -340,71 +370,12 @@ public class Main extends Application {
 		MenuItem graphs = new MenuItem("View Graphs");
 		MenuItem miniTimer = new MenuItem("Show MiniTimer");
 		
-		miniTimerWindow(viewMiniTimerWindow, primaryStage);
-		
 		previousLogs.setOnAction(a -> {
 			previousLogWindow();
 		});
 		
 		graphs.setOnAction(a -> {
-			Stage previousLogWindow = new Stage();
-			previousLogWindow.initModality(Modality.APPLICATION_MODAL);
-			previousLogWindow.setTitle("Previous Sessions");
-
-			// Add a text title inside the window
-			Text title = new Text("Previous Sessions");
-			title.setFont(new Font(18));
-			
-			final NumberAxis xAxis = new NumberAxis();
-	        final CategoryAxis yAxis = new CategoryAxis();
-	        final BarChart<NumberAxis, CategoryAxis> bc = new BarChart(xAxis,yAxis);
-	        bc.setTitle("Session History");
-	        bc.setLegendVisible(false);
-	        xAxis.setLabel("Duration(Seconds)");  
-	        xAxis.setTickLabelRotation(90);
-	        yAxis.setLabel("Session");
-	        
-			ObservableList<Series<NumberAxis, CategoryAxis>> data = getSessionsGraphData(timeController.getSessions());
-			
-			bc.setData(data);
-			
-			for (Series<NumberAxis, CategoryAxis> series: bc.getData()){
-	            for (XYChart.Data<NumberAxis, CategoryAxis> item: series.getData()){
-	                item.getNode().setOnMousePressed((MouseEvent event) -> {
-	                    System.out.println(String.valueOf(item.getYValue()));
-	                    Session matchingSession = timeController.getSessionByName(String.valueOf(item.getYValue()));
-	                    if(matchingSession != null) {
-	                    	TextInputDialog dialog = new TextInputDialog();
-	                    	dialog.initStyle(StageStyle.UTILITY);
-	                    	dialog.setTitle("Edit Session Name");
-	                    	dialog.setHeaderText("Edit Session Name");
-	                    	dialog.setContentText("New Session Name:");
-	                    	Optional<String> result = dialog.showAndWait();
-	                    	result.ifPresent(name -> matchingSession.setSessionName(name));
-	                    	//Name will need to be re-writen again
-	                    	//https://stackoverflow.com/questions/16880115/javafx-2-2-how-to-force-a-redraw-update-of-a-listview/25962110
-	                    	this.forceListRefreshOn(data,timeController.getSessions(),bc);
-	                    }
-	                    else {
-	                    	System.err.println("Error: Session matching name: " + item.getYValue().toString() + ": was not found.");
-	                    }
-	                });
-	            }
-	        }
-			
-			//-----------------------------------
-			
-			Text instructions = new Text("Click on bar to edit name of session");
-			
-			//-----------------------------------
-			
-			
-			// Make a layout, and add everything to it, centered
-			VBox layout = new VBox(10);
-			layout.getChildren().addAll(title, bc,instructions);
-			layout.setAlignment(Pos.CENTER);
-			previousLogWindow.setScene(new Scene(layout, 600, 600));
-			previousLogWindow.show();
+			graphsWindow();
 		});
 
 		miniTimer.setOnAction(a -> {
@@ -467,6 +438,11 @@ public class Main extends Application {
 			enableAppTracking.setDisable(true);
 		}
 		
+		// Load save file
+		loadSavedSessions();
+		
+		// Initialize Mini Timer
+		miniTimerWindow(viewMiniTimerWindow);
 		
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -478,10 +454,7 @@ public class Main extends Application {
 	}
 
 	/**
-	 * Shows the previous recorded sessions in the given Stage
-	 * 
-	 * @param window
-	 *            Stage to show the sessions in
+	 * Shows the previous recorded sessions
 	 */
 	private void previousLogWindow() {
 		Stage previousLogWindow = new Stage();
@@ -511,12 +484,12 @@ public class Main extends Application {
 		DatePicker startDate = new DatePicker();
 		startDate.setTooltip(new Tooltip("Start Date"));
 		startDate.setDisable(true);
-		startDate.setPrefWidth(100);
+		startDate.setPrefWidth(125);
 
 		DatePicker endDate = new DatePicker();
 		endDate.setTooltip(new Tooltip("End Date"));
 		endDate.setDisable(true);
-		endDate.setPrefWidth(100);
+		endDate.setPrefWidth(125);
 
 		// Add a button to export the logs
 		Button exportButton = new Button("Export Logs");
@@ -566,13 +539,13 @@ public class Main extends Application {
 			secondValueFactory.setWrapAround(true);
 
 			Spinner<Integer> hourSpinner = new Spinner<Integer>(hourValueFactory);
-			hourSpinner.setPrefWidth(50);
+			hourSpinner.setPrefWidth(75);
 
 			Spinner<Integer> minuteSpinner = new Spinner<Integer>(minuteValueFactory);
-			minuteSpinner.setPrefWidth(50);
+			minuteSpinner.setPrefWidth(75);
 
 			Spinner<Integer> secondSpinner = new Spinner<Integer>(secondValueFactory);
-			secondSpinner.setPrefWidth(50);
+			secondSpinner.setPrefWidth(75);
 
 			// creating text field for edit session name
 			TextField editSessionName = new TextField(editingSession.getSessionName()); // logs.getSelectionModel()
@@ -594,7 +567,7 @@ public class Main extends Application {
 				logs.setItems(FXCollections.observableArrayList(timeModel.getFormattedSessionList()));
 				deleteButton.setDisable(true);
 				editButton.setDisable(true);
-				timeController.saveSessions();
+				saveSessions();
 				editLogWindow.close();
 			});
 
@@ -633,7 +606,7 @@ public class Main extends Application {
 			chooser.setInitialDirectory(defaultDirectory);
 			File selectedDirectory = chooser.showDialog(previousLogWindow);
 			if (selectedDirectory != null) {
-				timeModel.setDirectory(selectedDirectory.getAbsolutePath());
+				newDirPath = selectedDirectory.getAbsolutePath();
 			}
 		});
 
@@ -644,22 +617,44 @@ public class Main extends Application {
 			deleteAlert.setHeaderText("Delete Confirmation");
 			deleteAlert.showAndWait().ifPresent(response -> {
 				if (response == ButtonType.OK) {
-					timeController.deleteSession(logIndex);
+					if(!timeController.deleteSession(logIndex)){
+						Alert deleteErrorAlert = new Alert(AlertType.ERROR, "Failed to delete the specified session");
+						deleteErrorAlert.setHeaderText("Delete Error");
+						deleteErrorAlert.showAndWait();
+					}
 					logs.setItems(FXCollections.observableArrayList(timeModel.getFormattedSessionList()));
 					deleteButton.setDisable(true);
 					editButton.setDisable(true);
-					timeController.saveSessions();
+					saveSessions();
 				}
 			});
 		});
 
 		// Export Button Handler
 		exportButton.setOnAction(b -> {
+			Alert successfulExportAlert = new Alert(AlertType.INFORMATION, "File Export was Successsful.");
+			successfulExportAlert.setHeaderText("Success");
+			
 			if (enableDateRange.isSelected()) {
-				// Insert code for dated export
-				timeController.writeToReadableFile(startDate.getValue(), endDate.getValue());
+				if (startDate.getValue() == null || endDate.getValue() == null) {
+					Alert emptyDateAlert = new Alert(AlertType.ERROR, "At least one of your dates was invalid. Please enter valid dates or diasble dated export");
+					emptyDateAlert.setHeaderText("Invalid Date");
+					emptyDateAlert.showAndWait();
+				} else if (startDate.getValue().isBefore(endDate.getValue())) {
+					if (writeToReadableFile(startDate.getValue(), endDate.getValue())) {
+						successfulExportAlert.showAndWait();
+					}
+				} else {
+					Alert invalidDateAlert = new Alert(AlertType.ERROR, "Your start date must come before your end date.");
+					invalidDateAlert.setHeaderText("Invalid Date");
+					invalidDateAlert.showAndWait();
+					startDate.getEditor().clear();
+					endDate.getEditor().clear();
+				}
 			} else {
-				timeController.writeToReadableFile();
+				if (writeToReadableFile()) {
+					successfulExportAlert.showAndWait();
+				}
 			}
 		});
 
@@ -684,14 +679,76 @@ public class Main extends Application {
 	}
 
 	/**
+	 * Show the graphs window containing previous sessions.
+	 */
+	private void graphsWindow() {
+		Stage graphsWindow = new Stage();
+		graphsWindow.initModality(Modality.APPLICATION_MODAL);
+		graphsWindow.setTitle("Previous Sessions");
+
+		// Add a text title inside the window
+		Text title = new Text("Previous Sessions");
+		title.setFont(new Font(18));
+		
+		final NumberAxis xAxis = new NumberAxis();
+        final CategoryAxis yAxis = new CategoryAxis();
+        final BarChart<Number, String> bc = new BarChart<Number, String>(xAxis,yAxis);
+        bc.setTitle("Session History");
+        bc.setLegendVisible(false);
+        xAxis.setLabel("Duration(Seconds)");  
+        xAxis.setTickLabelRotation(90);
+        yAxis.setLabel("Session");
+        
+		ObservableList<Series<Number, String>> data = getSessionsGraphData(timeController.getSessions());
+		
+		bc.setData(data);
+		
+		for (Series<Number, String> series: bc.getData()){
+            for (XYChart.Data<Number, String> item: series.getData()){
+                item.getNode().setOnMousePressed((MouseEvent event) -> {
+                    System.out.println(String.valueOf(item.getYValue()));
+                    Session matchingSession = timeController.getSessionByName(String.valueOf(item.getYValue()));
+                    if(matchingSession != null) {
+                    	TextInputDialog dialog = new TextInputDialog();
+                    	dialog.initStyle(StageStyle.UTILITY);
+                    	dialog.setTitle("Edit Session Name");
+                    	dialog.setHeaderText("Edit Session Name");
+                    	dialog.setContentText("New Session Name:");
+                    	Optional<String> result = dialog.showAndWait();
+                    	result.ifPresent(name -> matchingSession.setSessionName(name));
+                    	//Name will need to be re-writen again
+                    	//https://stackoverflow.com/questions/16880115/javafx-2-2-how-to-force-a-redraw-update-of-a-listview/25962110
+                    	this.forceListRefreshOn(data,timeController.getSessions(),bc);
+                    }
+                    else {
+                    	System.err.println("Error: Session matching name: " + item.getYValue().toString() + ": was not found.");
+                    }
+                });
+            }
+        }
+		
+		//-----------------------------------
+		
+		Text instructions = new Text("Click on bar to edit name of session");
+		
+		//-----------------------------------
+		
+		
+		// Make a layout, and add everything to it, centered
+		VBox layout = new VBox(10);
+		layout.getChildren().addAll(title, bc,instructions);
+		layout.setAlignment(Pos.CENTER);
+		graphsWindow.setScene(new Scene(layout, 600, 600));
+		graphsWindow.show();
+	}
+	
+	/**
 	 * Creates but does not show a mini timer window with only the timer.
 	 * 
 	 * @param window
 	 *            The stage for the minitimer
-	 * @param primaryWindow
-	 *            The main stage
 	 */
-	private void miniTimerWindow(Stage window, Stage primaryWindow) {
+	private void miniTimerWindow(Stage window) {
 		Stage miniTimerWindow = window;
 		miniTimerWindow.initStyle(StageStyle.UNDECORATED);
 		int height = 60, width = 200;
@@ -725,14 +782,7 @@ public class Main extends Application {
             }
         });
 		
-		
 		miniTimerWindow.setScene(miniScene);
-
-		//miniTimerWindow.show();
-
-		miniTimerWindow.setOnCloseRequest(a -> {
-			primaryWindow.requestFocus();
-		});
 	}
 	
 	private void setUIColor(Color c, String color) {
@@ -747,15 +797,305 @@ public class Main extends Application {
 		}
 		timerText.setFill(c);
 	}
+
+	/**
+	 * Loads the saved userdata csv. If the file is not present, it aborts, and
+	 * if the file is formatted incorrectly, it aborts
+	 * 
+	 * @return
+	 */
+	private boolean loadSavedSessions() {
+		File saveFile = new File("output/userdata.csv");
+
+		Scanner key;
+		try {
+			key = new Scanner(saveFile);
+		} catch (FileNotFoundException e) {
+			return false;
+		}
+		List<String> sessions = new ArrayList<String>();
+		while (key.hasNextLine()) {
+			sessions.add(key.nextLine());
+		}
+		key.close();
+
+		// saves times as timepairs, and add to a session.
+		String[] times;
+		for (String line : sessions) {
+			Session session = new Session();
+			times = line.split(",");
+			if (!times[0].isEmpty()) {
+				for (int i = 0; i < times.length - 1; i += 2) {
+					try {
+						TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
+						session.addTimePair(tp);
+					} catch (Exception e) {
+						sessions.clear();
+						return false;
+					}
+
+				}
+				if (times.length % 2 != 0) {
+					session.setSessionName(times[times.length - 1]);
+				} else {
+					session.setSessionName("");
+				}
+				timeController.addSession(session);
+			}
+		}
+		return true;
+	}
 	
-	private ObservableList<Series<NumberAxis, CategoryAxis>> getSessionsGraphData(List<Session> sessions) {
-	    ObservableList<XYChart.Series<NumberAxis,CategoryAxis>> answer = FXCollections.observableArrayList();
+	/**
+	 * Writes the sessions to a human readable format.
+	 * 
+	 * @return true if the write happens, false otherwise
+	 */
+	private boolean writeToReadableFile() {
+		File outDir = new File(newDirPath);
+		File outFile = new File(newDirPath + "/UserLogs.csv");
+
+		Alert fileWriteAlert = new Alert(AlertType.ERROR, "File was unable to be written.");
+		fileWriteAlert.setHeaderText("File Save Error");
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("Session Name:");
+		sb.append(",");
+		sb.append("Start Time:");
+		sb.append(",");
+		sb.append("End Time");
+		sb.append(",");
+		sb.append("Duration");
+		sb.append("\n");
+
+		if (timeController.getSessions().size() < 1) {
+			Alert noSessionsAlert = new Alert(AlertType.ERROR, "No sessions in the specified date range");
+			noSessionsAlert.setHeaderText("Export Error");
+			noSessionsAlert.showAndWait();
+			return false;
+		}
+		
+		for (Session session : timeController.getSessions()) {
+			int sessionSize = session.getTimePairList().size();
+			if(sessionSize > 0) {
+				TimePair startPair = session.getTimePairList().get(0);
+				TimePair endPair = sessionSize > 1 ? session.getTimePairList().get(sessionSize - 1) : startPair;
+				Date timeBegin = new Date(startPair.getStartTime());
+				Date timeEnd = new Date(endPair.getEndTime());
+				DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
+				String startTime = dateFormat.format(timeBegin);
+				String endTime = dateFormat.format(timeEnd);
+				List<Integer> duration = session.getDuration();
+				String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1),
+						duration.get(2));
+				sb.append(session.getSessionName());
+				sb.append(",");
+				sb.append(startTime);
+				sb.append(",");
+				sb.append(endTime);
+				sb.append(",");
+				sb.append(durationTime);
+				sb.append("\n");
+			}
+		}
+		
+		// Make the directory if it doesn't exist.
+		try {
+			outDir.mkdir();
+		} catch (Exception e) {
+			fileWriteAlert.showAndWait();
+			return false;
+		}
+
+		PrintWriter pw;
+		try {
+			pw = new PrintWriter(outFile);
+		} catch (FileNotFoundException e) {
+			fileWriteAlert.showAndWait();
+			return false;
+		}
+		
+		pw.write(sb.toString());
+		pw.close();
+		
+		try {
+			Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
+		} catch (IOException e) {
+			// File explorer could not be opened, but write was successful.
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Writes the sessions from a specified date range to a human readable
+	 * format
+	 * 
+	 * @param start
+	 *            Start Date
+	 * @param end
+	 *            End Date
+	 * @return true if the file is written, false otherwise
+	 */
+	private boolean writeToReadableFile(LocalDate start, LocalDate end) {
+		// Set up start Millis
+		Instant startDate = Instant.from(start.atStartOfDay(ZoneId.of("UTC")));
+		long startMillis = startDate.getEpochSecond() * 1000;
+
+		// Set up end Millis
+		end = end.plusDays(1);
+		Instant endDate = Instant.from(end.atStartOfDay(ZoneId.of("UTC")));
+		long endMillis = endDate.getEpochSecond() * 1000;
+		
+		File outDir = new File(newDirPath);
+		File outFile = new File(newDirPath + "/range" + getNumberOfExportedRangeFiles() + ".csv");
+
+		Alert fileWriteAlert = new Alert(AlertType.ERROR, "File was unable to be written.");
+		fileWriteAlert.setHeaderText("File Save Error");
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("Session Name:");
+		sb.append(",");
+		sb.append("Start Time:");
+		sb.append(",");
+		sb.append("End Time");
+		sb.append(",");
+		sb.append("Duration");
+		sb.append("\n");
+		
+		int validSessions = 0;
+		
+		for (Session session : timeController.getSessions()) {
+			int sessionSize = session.getTimePairList().size();
+			if(sessionSize > 0) {
+				TimePair startPair = session.getTimePairList().get(0);
+				TimePair endPair = sessionSize > 1 ? session.getTimePairList().get(sessionSize - 1) : startPair;
+				if ((startPair.getStartTime() >= startMillis && startPair.getStartTime() <= endMillis)
+						|| (endPair.getEndTime() >= startMillis && endPair.getEndTime() <= endMillis)) {
+					validSessions++;
+					Date timeBegin = new Date(startPair.getStartTime());
+					Date timeEnd = new Date(endPair.getEndTime());
+					DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
+					String startTime = dateFormat.format(timeBegin);
+					String endTime = dateFormat.format(timeEnd);
+					List<Integer> duration = session.getDuration();
+					String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1),
+							duration.get(2));
+					sb.append(session.getSessionName());
+					sb.append(",");
+					sb.append(startTime);
+					sb.append(",");
+					sb.append(endTime);
+					sb.append(",");
+					sb.append(durationTime);
+					sb.append("\n");
+				}
+			}
+		}
+		
+		if (validSessions < 1) {
+			Alert noSessionsAlert = new Alert(AlertType.ERROR, "No sessions to export in the specified range.");
+			noSessionsAlert.setHeaderText("Export Error");
+			noSessionsAlert.showAndWait();
+			return false;
+		}
+		
+		// Make the directory if it doesn't exist.
+		try {
+			outDir.mkdir();
+		} catch (Exception e) {
+			fileWriteAlert.showAndWait();
+			return false;
+		}
+
+		PrintWriter pw;
+		try {
+			pw = new PrintWriter(outFile);
+		} catch (FileNotFoundException e) {
+			fileWriteAlert.showAndWait();
+			return false;
+		}
+		
+		pw.write(sb.toString());
+		pw.close();
+
+		try {
+			Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
+		} catch (IOException e) {
+			// File explorer could not be opened, but write was successful.
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Get the number of range files that already exist
+	 * 
+	 * @return number of range files
+	 */
+	private int getNumberOfExportedRangeFiles() {
+		File out = new File("output");
+		File[] filesInOutput = out.listFiles();
+		int count = 0;
+		for (File f : filesInOutput) {
+			if (f.getName().contains("range")) {
+				count++;
+			}
+		}
+		return ++count;
+	}
+	
+	/**
+	 * Writes the sessions to a file in CSV format.
+	 * 
+	 * @return true if file is written, false otherwise.
+	 */
+	private boolean saveSessions() {
+		File outDirNonReadable = new File("output");
+		File outFileNonReadable = new File("output/userdata.csv");
+
+		// Make the directory if it doesn't exist.
+		try {
+			outDirNonReadable.mkdir();
+		} catch (Exception e) {
+			return false;
+		}
+
+		PrintWriter out;
+		try {
+			out = new PrintWriter(outFileNonReadable);
+		} catch (IOException e) {
+			// If an exception with opening the file happens, return false.
+			return false;
+		}
+
+		for (Session session : timeController.getSessions()) {
+
+			// Go through each pair of times
+			for (TimePair tp : session.getTimePairList()) {
+				// Print both times, each one followed by a comma.
+				out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
+			}
+			// Print the session name, if it exists, at the end of the list
+			if (session.getSessionName() != null) {
+				out.printf("%s,", session.getSessionName());
+			}
+			// Add a new line at the end of the session.
+			out.print("\n");
+
+		}
+		out.close();
+		return true;
+	}
+	
+	private ObservableList<Series<Number, String>> getSessionsGraphData(List<Session> sessions) {
+	    ObservableList<XYChart.Series<Number, String>> answer = FXCollections.observableArrayList();
         
-        XYChart.Series<NumberAxis,CategoryAxis> series1 = new XYChart.Series<NumberAxis,CategoryAxis>();
+        XYChart.Series<Number, String> series1 = new XYChart.Series<Number, String>();
         series1.setName("Sesson Duration");  
         
         for(Session session : sessions) {
-        	series1.getData().add(new XYChart.Data(session.getTotalTime() / 1000, session.getSessionName()));
+        	series1.getData().add(new XYChart.Data<Number, String>(session.getTotalTime() / 1000, session.getSessionName()));
         }
         
         answer.add(series1);
@@ -763,19 +1103,18 @@ public class Main extends Application {
         return answer;
 	}
 	
-	private <T> void forceListRefreshOn(ObservableList<Series<NumberAxis, CategoryAxis>> data, List<Session> list, BarChart<NumberAxis, CategoryAxis> bc) {
-	    ObservableList<Series<NumberAxis, CategoryAxis>> items = data;
+	private <T> void forceListRefreshOn(ObservableList<Series<Number, String>> data, List<Session> list, BarChart<Number, String> bc) {
 	    data.clear();
 	    
 	    data = getSessionsGraphData(timeController.getSessions());
 		
 		bc.setData(data);
 		
-		for (Series<NumberAxis, CategoryAxis> series: bc.getData()){
-            for (XYChart.Data<NumberAxis, CategoryAxis> item: series.getData()){
+		for (Series<Number, String> series: bc.getData()){
+            for (XYChart.Data<Number, String> item: series.getData()){
                 item.getNode().setOnMousePressed(new EventHandler<MouseEvent>() {
                 	//https://stackoverflow.com/questions/5107158/how-to-pass-parameters-to-anonymous-class
-                	private ObservableList<Series<NumberAxis, CategoryAxis>> anonVar;
+                	private ObservableList<Series<Number, String>> anonVar;
                     public void handle(MouseEvent me) {
                     	System.out.println(String.valueOf(item.getYValue()));
                         Session matchingSession = timeController.getSessionByName(String.valueOf(item.getYValue()));
@@ -787,7 +1126,7 @@ public class Main extends Application {
                         	System.err.println("Error: Session matching name: " + item.getYValue().toString() + ": was not found.");
                         }
                     }
-                    private EventHandler<MouseEvent> init(ObservableList<Series<NumberAxis, CategoryAxis>> data){
+                    private EventHandler<MouseEvent> init(ObservableList<Series<Number, String>> data){
                         anonVar = data;
                         return this;
                     }

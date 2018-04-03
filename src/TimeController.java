@@ -1,4 +1,3 @@
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +86,16 @@ public class TimeController {
 	}
 
 	/**
+	 * Adds the specified session to the TimeModel
+	 * 
+	 * @param session 
+	 * 			  Session to be added
+	 */
+	public void addSession(Session session) {
+		timeModel.addSession(session);
+	}
+	
+	/**
 	 * Edits the session stored in the session list at the specified index to
 	 * have the new duration by creating a new TimePair with the same start time
 	 * and an end time at the new duration after the start time
@@ -129,38 +138,6 @@ public class TimeController {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Writes the sessions to a file in CSV format.
-	 * 
-	 * @return true if file is written, false otherwise.
-	 */
-	public boolean saveSessions() {
-		return timeModel.saveSessions();
-	}
-
-	/**
-	 * Writes the sessions to a human readable format.
-	 * 
-	 * @return true if the write happens, false otherwise
-	 */
-	public boolean writeToReadableFile() {
-		return timeModel.writeToReadableFile();
-	}
-
-	/**
-	 * Writes the sessions from a specified date range to a human readable
-	 * format
-	 * 
-	 * @param start
-	 *            Start Date
-	 * @param end
-	 *            End Date
-	 * @return true if the file is written, false otherwise
-	 */
-	public boolean writeToReadableFile(LocalDate start, LocalDate end) {
-		return timeModel.writeToReadableFile(start, end);
 	}
 	
 	/**

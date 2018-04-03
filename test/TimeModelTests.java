@@ -186,25 +186,6 @@ public class TimeModelTests {
         assertEquals(list, timeModel.getFormattedSessionList());
     }
 
-    //The following three tests could obviously be fleshed out more, but a proper way of testing would be
-    //have to be very extensive and time consuming. For now, manual testing should be sufficient,
-    //however if any of these tests returns false, it would still be a good
-    //indicator that something is wrong.
-    @Test
-    public void loadSavedSessions() {
-        assertTrue(timeModel.loadSavedSessions());
-    }
-
-    @Test
-    public void saveSessions() {
-        assertTrue(timeModel.saveSessions());
-    }
-
-    @Test
-    public void writeToReadableFile() {
-        assertTrue(timeModel.writeToReadableFile());
-    }
-
     @Test
     public void getSessions() {
         Session session = new Session();
@@ -237,15 +218,6 @@ public class TimeModelTests {
         timeModel.setSessions(sessions);
 
         assertEquals(sessions, timeModel.getSessions());
-    }
-
-    @Test
-    public void setDirectory() {
-        assertEquals("output", timeModel.getDirectory());
-
-        timeModel.setDirectory("newDirectory");
-
-        assertEquals("newDirectory", timeModel.getDirectory());
     }
 
     @Test

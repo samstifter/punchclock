@@ -1,16 +1,5 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * The TimeModel class is the Model component of the MVC framework. It acts as a
@@ -25,7 +14,6 @@ public class TimeModel {
 	private long lastStart;
 	private boolean started;
 	private List<Session> sessions;
-	private String newDirPath = "output";
 
 	private Session currSession;
 
@@ -152,257 +140,6 @@ public class TimeModel {
 	}
 
 	/**
-	 * Loads the saved userdata csv. If the file is not present, it aborts, and
-	 * if the file is formatted incorrectly, it aborts
-	 * 
-	 * @return
-	 */
-	public boolean loadSavedSessions() {
-		File saveFile = new File("output/userdata.csv");
-
-		Scanner key;
-		try {
-			key = new Scanner(saveFile);
-		} catch (FileNotFoundException e) {
-			return false;
-		}
-		List<String> sessions = new ArrayList<String>();
-		while (key.hasNextLine()) {
-			sessions.add(key.nextLine());
-		}
-		key.close();
-
-		// saves times as timepairs, and add to a session.
-		String[] times;
-		for (String line : sessions) {
-			Session session = new Session();
-			times = line.split(",");
-			if (!times[0].isEmpty()) {
-				for (int i = 0; i < times.length - 1; i += 2) {
-					try {
-						TimePair tp = new TimePair(Long.parseLong(times[i]), Long.parseLong(times[i + 1]));
-						session.addTimePair(tp);
-					} catch (Exception e) {
-						sessions.clear();
-						return false;
-					}
-
-				}
-				if (times.length % 2 != 0) {
-					session.setSessionName(times[times.length - 1]);
-				} else {
-					session.setSessionName("");
-				}
-				this.addSession(session);
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Writes the sessions to a file in CSV format.
-	 * 
-	 * @return true if file is written, false otherwise.
-	 */
-	public boolean saveSessions() {
-		File outDirNonReadable = new File("output");
-		File outFileNonReadable = new File("output/userdata.csv");
-
-		List<Session> sessionList = this.getSessions();
-
-		// Make the directory if it doesn't exist.
-		try {
-			outDirNonReadable.mkdir();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-
-		PrintWriter out;
-		try {
-			out = new PrintWriter(outFileNonReadable);
-		} catch (IOException e) {
-			// If an exception with opening the file happens, return false.
-			System.err.println("Could not write file");
-			e.printStackTrace();
-			return false;
-		}
-
-		for (Session session : sessionList) {
-
-			// Go through each pair of times
-			for (TimePair tp : session.getTimePairList()) {
-				// Print both times, each one followed by a comma.
-				out.printf("%d,%d,", tp.getStartTime(), tp.getEndTime());
-			}
-			// Print the session name, if it exists, at the end of the list
-			if (session.getSessionName() != null) {
-				out.printf("%s,", session.getSessionName());
-			}
-			// Add a new line at the end of the session.
-			out.print("\n");
-
-		}
-		out.close();
-		return true;
-	}
-
-	/**
-	 * Writes the sessions to a human readable format.
-	 * 
-	 * @return true if the write happens, false otherwise
-	 */
-	public boolean writeToReadableFile() {
-		File outDir = new File(newDirPath);
-		File outFile = new File(newDirPath + "/UserLogs.csv");
-
-		// Make the directory if it doesn't exist.
-		try {
-			outDir.mkdir();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			return false;
-		}
-
-		PrintWriter pw;
-		try {
-			pw = new PrintWriter(outFile);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return false;
-		}
-		StringBuilder sb = new StringBuilder();
-		sb.append("Session Name:");
-		sb.append(",");
-		sb.append("Start Time:");
-		sb.append(",");
-		sb.append("End Time");
-		sb.append(",");
-		sb.append("Duration");
-		sb.append("\n");
-
-		for (Session session : this.sessions) {
-			for (TimePair pair : session.getTimePairList()) {
-				Date timeBegin = new Date(pair.getStartTime());
-				Date timeEnd = new Date(pair.getEndTime());
-				DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
-				String startTime = dateFormat.format(timeBegin);
-				String endTime = dateFormat.format(timeEnd);
-				List<Integer> duration = pair.getDuration();
-				String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1), duration.get(2));
-				sb.append(session.getSessionName());
-				sb.append(",");
-				sb.append(startTime);
-				sb.append(",");
-				sb.append(endTime);
-				sb.append(",");
-				sb.append(durationTime);
-				sb.append("\n");
-			}
-		}
-		pw.write(sb.toString());
-		pw.close();
-		try {
-			Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Writes the sessions from a specified date range to a human readable
-	 * format
-	 * 
-	 * @param start
-	 *            Start Date
-	 * @param end
-	 *            End Date
-	 * @return true if the file is written, false otherwise
-	 */
-	public boolean writeToReadableFile(LocalDate start, LocalDate end) {
-		// Set up start Millis
-		Instant startDate = Instant.from(start.atStartOfDay(ZoneId.of("UTC")));
-		long startMillis = startDate.getEpochSecond() * 1000;
-
-		// Set up end Millis
-		end = end.plusDays(1);
-		Instant endDate = Instant.from(end.atStartOfDay(ZoneId.of("UTC")));
-		long endMillis = endDate.getEpochSecond() * 1000;
-
-		List<Session> sessions = this.getSessions();
-		StringBuilder sb = new StringBuilder();
-		sb.append("Session Name:");
-		sb.append(",");
-		sb.append("Start Time:");
-		sb.append(",");
-		sb.append("End Time");
-		sb.append(",");
-		sb.append("Duration");
-		sb.append("\n");//
-		for (Session session : sessions) {
-			List<TimePair> pairs = session.getTimePairList();
-			for (TimePair pair : pairs) {
-				if ((pair.getStartTime() >= startMillis && pair.getStartTime() <= endMillis)
-						|| (pair.getEndTime() >= startMillis && pair.getEndTime() <= endMillis)) {
-					Date timeBegin = new Date(pair.getStartTime());
-					Date timeEnd = new Date(pair.getEndTime());
-					DateFormat dateFormat = new SimpleDateFormat("EEEE MMMM dd yyyy hh:mm:ss a");
-					String startTime = dateFormat.format(timeBegin);
-					String endTime = dateFormat.format(timeEnd);
-					List<Integer> duration = pair.getDuration();
-					String durationTime = String.format("%d:%02d:%02d", duration.get(0), duration.get(1),
-							duration.get(2));
-					sb.append(session.getSessionName());
-					sb.append(",");
-					sb.append(startTime);
-					sb.append(",");
-					sb.append(endTime);
-					sb.append(",");
-					sb.append(durationTime);
-					sb.append("\n");
-				}
-			}
-		}
-		String dir = newDirPath + "/range" + getNumberOfExportedRangeFiles() + ".csv";
-		File exportedFile = new File(dir);
-		try {
-			PrintWriter pw = new PrintWriter(exportedFile);
-			pw.write(sb.toString());
-			pw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		try {
-			Runtime.getRuntime().exec("explorer.exe /select," + exportedFile.getAbsolutePath());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get the number of range files that already exist
-	 * 
-	 * @return number of range files
-	 */
-	public int getNumberOfExportedRangeFiles() {
-		File out = new File("output");
-		File[] filesInOutput = out.listFiles();
-		int count = 0;
-		for (File f : filesInOutput) {
-			if (f.getName().contains("range")) {
-				count++;
-			}
-		}
-		return ++count;
-	}
-
-	/**
 	 * Get a list containing Session objects
 	 * 
 	 * @return The list containing the Session objects
@@ -420,25 +157,6 @@ public class TimeModel {
 	}
 
 	/**
-	 * Sets the new directory to export to
-	 * 
-	 * @param dirName
-	 *            New Directory
-	 */
-	public void setDirectory(String dirName) {
-		System.out.println(dirName);
-		newDirPath = dirName;
-	}
-
-    /**
-     * Returns the TimeModel's directory. Used primarily for testing.
-     * @return
-     */
-	public String getDirectory() {
-	    return newDirPath;
-    }
-
-	/**
 	 * Returns the TimeModel's last start
 	 *
 	 * @return The TimeModel's last start
@@ -446,7 +164,6 @@ public class TimeModel {
 	public long getLastStart() {
 		return lastStart;
 	}
-
 
 	/**
 	 * Sets the last start. Used for testing
