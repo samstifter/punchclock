@@ -305,6 +305,12 @@ public class Main extends Application {
 
 		enableAppTracking.setOnAction(a -> {
 			if (enableAppTracking.isSelected()) {
+				Alert appTrackingInfo = new Alert(AlertType.INFORMATION, 
+						"Application tracking will keep the timer running as long as the selected application is running. " + 
+						"Re-opening the appplication, as long as it is still selected in the dropdown, will start the timer again.");
+				appTrackingInfo.setHeaderText("Application Tracking");
+				appTrackingInfo.setTitle("Application Tracking Info");
+				appTrackingInfo.showAndWait();
 				startButton.setDisable(true);
 				applicationList.setDisable(false);
 			} else {
