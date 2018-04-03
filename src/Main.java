@@ -163,7 +163,7 @@ public class Main extends Application {
 		while (true) {
 			List<String> fetchedList = new ArrayList<String>();
 			fetchedList.add("NONE");
-			String listCommand = "powershel -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
+			String listCommand = "powershell -command \" Get-Process | where {$_.mainWindowTitle} | Format-Table name";
 			try {
 				String line;
 				int outLen = 79;
