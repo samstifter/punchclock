@@ -539,8 +539,8 @@ public class TimeView extends Application {
 			}
 		});
 
-		Button directoryExportButton = new Button("Change Export Directory");
-		directoryExportButton.setText("Change Export Directory");
+		//Button directoryExportButton = new Button("Change Export Directory");
+		//directoryExportButton.setText("Change Export Directory");
 
 		// edit button handler
 		editButton.setOnAction(b -> {
@@ -635,6 +635,7 @@ public class TimeView extends Application {
 
 		});
 
+		/*
 		directoryExportButton.setOnAction(b -> {
 			DirectoryChooser chooser = new DirectoryChooser();
 			chooser.setTitle("Select Directory");
@@ -645,6 +646,7 @@ public class TimeView extends Application {
 				newDirPath = selectedDirectory.getAbsolutePath();
 			}
 		});
+		*/
 
 		// delete button handler
 		deleteButton.setOnAction(b -> {
@@ -670,6 +672,16 @@ public class TimeView extends Application {
 		exportButton.setOnAction(b -> {
 			Alert successfulExportAlert = new Alert(AlertType.INFORMATION, "File Export was Successsful.");
 			successfulExportAlert.setHeaderText("Success");
+			
+			//Choose the directory in which to export
+			DirectoryChooser chooser = new DirectoryChooser();
+			chooser.setTitle("Select Directory");
+			File defaultDirectory = new File("output");
+			chooser.setInitialDirectory(defaultDirectory);
+			File selectedDirectory = chooser.showDialog(previousLogWindow);
+			if (selectedDirectory != null) {
+				newDirPath = selectedDirectory.getAbsolutePath();
+			}
 			
 			if (enableDateRange.isSelected()) {
 				if (startDate.getValue() == null || endDate.getValue() == null) {
@@ -707,8 +719,7 @@ public class TimeView extends Application {
 		deleteEditButtons.setAlignment(Pos.CENTER);
 		dates.getChildren().addAll(startDate, endDate);
 		dates.setAlignment(Pos.CENTER);
-		layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton,
-				directoryExportButton);
+		layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton);
 		layout.setAlignment(Pos.CENTER);
 		previousLogWindow.setScene(new Scene(layout, 300, 400));
 		previousLogWindow.show();
@@ -954,12 +965,6 @@ public class TimeView extends Application {
 		pw.write(sb.toString());
 		pw.close();
 		
-		try {
-			Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
-		} catch (IOException e) {
-			// File explorer could not be opened, but write was successful.
-		}
-		
 		return true;
 	}
 	
@@ -1054,12 +1059,6 @@ public class TimeView extends Application {
 		
 		pw.write(sb.toString());
 		pw.close();
-
-		try {
-			Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
-		} catch (IOException e) {
-			// File explorer could not be opened, but write was successful.
-		}
 		
 		return true;
 	}
