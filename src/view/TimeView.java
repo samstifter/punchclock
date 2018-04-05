@@ -286,8 +286,6 @@ public class TimeView extends Application {
 
 		Text applicationListTitle = new Text("Application to Track");
 		Text logNameTitle = new Text("Set Session Name");
-		
-		Text invalidName = new Text("(Empty name)");
 
 		ComboBox<String> applicationList = new ComboBox<String>();
 		applicationList.setValue("NONE");
@@ -295,8 +293,6 @@ public class TimeView extends Application {
 
 		TextField sessionName = new TextField();
 		sessionName.setPrefSize(150, 5);
-		
-		invalidName.setFill(Color.RED);
 		
 		Alert fileWriteAlert = new Alert(AlertType.ERROR, "File was unable to be written.");
 		fileWriteAlert.setHeaderText("File Save Error");
@@ -318,11 +314,6 @@ public class TimeView extends Application {
 			}
 			saveButton.setDisable(false);
 			clearButton.setDisable(false);
-			if (sessionName.getText().trim().length() != 0 && sessionName.getText() != null) {
-				invalidName.setText("");
-			}else {
-				invalidName.setText("(Empty name)");
-			}
 		});
 
 		saveButton.setOnAction(a -> {
@@ -356,14 +347,6 @@ public class TimeView extends Application {
 
 		sessionName.setOnKeyReleased(a -> {
 			timeController.setSessionName(sessionName.getText());
-			if (saveButtonReady && sessionName.getText().trim().length() != 0 && sessionName.getText() != null) {
-				invalidName.setText("");
-				
-			}else  if (sessionName.getText().trim().length() != 0 && sessionName.getText() != null){
-				invalidName.setText("");
-			}else{
-				invalidName.setText("(Empty name)");
-			}
 		});
 
 		applicationList.setOnShowing(a -> {
@@ -467,7 +450,7 @@ public class TimeView extends Application {
 		controlButtons.setAlignment(Pos.CENTER);
 
 		HBox logNames = new HBox(10);
-		logNames.getChildren().addAll(logNameTitle, sessionName, invalidName);
+		logNames.getChildren().addAll(logNameTitle, sessionName);
 		logNames.setAlignment(Pos.CENTER);
 
 		VBox applicationSelect = new VBox(3);
