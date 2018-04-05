@@ -677,7 +677,12 @@ public class TimeView extends Application {
 			
 			ButtonType showFile = new ButtonType("View");
 			ButtonType ok = new ButtonType("Ok", ButtonData.OK_DONE);
-			successfulExportAlert.getButtonTypes().setAll(showFile, ok);
+			if(osVersion.toLowerCase().contains("windows")) {
+				successfulExportAlert.getButtonTypes().setAll(showFile, ok);
+			}
+			else {
+				successfulExportAlert.getButtonTypes().setAll(ok);
+			}
 			Optional<ButtonType> result = null;
 			
 			
