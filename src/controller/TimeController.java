@@ -18,8 +18,6 @@ import view.TimeView;
  */
 public class TimeController {
 	private TimeModel timeModel;
-	private TimeView timeView;
-
 	/**
 	 * A controller for the PunchClock
 	 * 
@@ -30,7 +28,6 @@ public class TimeController {
 	 */
 	public TimeController(TimeModel timeModel, TimeView timeView) {
 		this.timeModel = timeModel;
-		this.timeView = timeView;
 	}
 
 	/**
@@ -80,16 +77,6 @@ public class TimeController {
 	 */
 	public long getCurrentSessionElapsedTime() {
 		return timeModel.getCurrentSessionTime();
-	}
-
-	/**
-	 * Displays the total elapsed time to the console
-	 * 
-	 * @param timeModel,
-	 *            the model you wish to display the time of
-	 */
-	public void displayElapsedTimeInSeconds(TimeModel timeModel) {
-		timeView.displayElapsedTimeInSeconds(timeModel);
 	}
 
 	/**

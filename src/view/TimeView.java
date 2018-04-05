@@ -47,6 +47,7 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -108,6 +109,9 @@ public class TimeView extends Application {
 	
 	//Operating System - To determine if Application can run
 	private static String osVersion;
+	
+	//Icon for application
+	private Image icon = null;
 
 	/**
 	 * Initialize the Application
@@ -245,6 +249,15 @@ public class TimeView extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		try {
+    		this.icon = new Image(getClass().getResourceAsStream("icon.png"));
+    	}catch(Exception e) {
+    		//Image could not be loaded, proceed anyway
+    	}
+		// =====Set Icon=====
+		if(icon != null) {
+			primaryStage.getIcons().add(icon);
+		}
 		// =====Setup Time Components=====
 		timeController = new TimeController(timeModel, timeView);
 
@@ -301,7 +314,6 @@ public class TimeView extends Application {
 				this.setUIColor(Color.BLACK,"black");
 				startButton.setText("Start");
 				timeController.stopTime();
-				timeController.displayElapsedTimeInSeconds(timeModel);
 				enableAppTracking.setDisable(false);
 			}
 			saveButton.setDisable(false);
@@ -312,6 +324,9 @@ public class TimeView extends Application {
 			this.setUIColor(Color.BLACK,"black");
 			startButton.setText("Start");
 			applicationList.setValue("NONE");
+			if(sessionName.getText().isEmpty()){
+				timeController.setSessionName("Untitled");
+			}
 			timeController.stopTime();
 			timeController.endCurrentSession();
 			if (!saveSessions()) {
@@ -484,6 +499,9 @@ public class TimeView extends Application {
 		Stage previousLogWindow = new Stage();
 		previousLogWindow.initModality(Modality.APPLICATION_MODAL);
 		previousLogWindow.setTitle("Previous Session Logs");
+		if(icon != null) {
+			previousLogWindow.getIcons().add(icon);
+		}
 
 		// Add a text title inside the window
 		Text title = new Text("Previous Session Logs");
@@ -740,6 +758,9 @@ public class TimeView extends Application {
 		Stage graphsWindow = new Stage();
 		graphsWindow.initModality(Modality.APPLICATION_MODAL);
 		graphsWindow.setTitle("Previous Sessions");
+		if(icon != null) {
+			graphsWindow.getIcons().add(icon);
+		}
 
 		// Add a text title inside the window
 		Text title = new Text("Previous Sessions");
