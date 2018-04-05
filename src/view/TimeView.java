@@ -272,27 +272,28 @@ public class TimeView extends Application {
 		miniTimerText.setFont(new Font(45));
 
 		Button startButton = new Button("Start");
-		startButton.setTooltip(new Tooltip("Start/stop the timer"));
+		startButton.setTooltip(new Tooltip("Start/Stop The Timer"));
 		startButton.setFont(new Font(15));
 
 		Button saveButton = new Button("Save");
-		saveButton.setTooltip(new Tooltip("Save the current session"));
+		saveButton.setTooltip(new Tooltip("Save The Current Session"));
 		saveButton.setFont(new Font(15));
 		saveButton.setDisable(true);
 		
 		Button clearButton = new Button("Clear");
-		clearButton.setTooltip(new Tooltip("Reset the current time"));
+		clearButton.setTooltip(new Tooltip("Reset The Current Time"));
 		clearButton.setFont(new Font(15));
 		clearButton.setDisable(true);
 
 		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
-		enableAppTracking.setTooltip(new Tooltip("Track the use of certain applications"));
+		enableAppTracking.setTooltip(new Tooltip("Track The Use Of Certain Applications"));
 
 		Text applicationListTitle = new Text("Application to Track");
 		Text logNameTitle = new Text("Set Session Name");
 
 		ComboBox<String> applicationList = new ComboBox<String>();
 		applicationList.setValue("NONE");
+		applicationList.setTooltip(new Tooltip("Select Application"));
 		applicationList.setDisable(true);
 
 		TextField sessionName = new TextField();
@@ -515,10 +516,14 @@ public class TimeView extends Application {
 		logs.setPrefWidth(300);
 
 		Button editButton = new Button("Edit");
+		editButton.setTooltip(new Tooltip("Edit The Selected Logs"));
 		editButton.setDisable(true);
 
 		// Delete button
 		Button deleteButton = new Button("Delete");
+		deleteButton.setTooltip(new Tooltip("Delete The Selected Logs"));
+		deleteButton.setFont(new Font(15));
+		
 		deleteButton.setDisable(true);
 
 		CheckBox enableDateRange = new CheckBox("Export from a date range");
@@ -535,6 +540,8 @@ public class TimeView extends Application {
 
 		// Add a button to export the logs
 		Button exportButton = new Button("Export Logs");
+		exportButton.setTooltip(new Tooltip("Export Selected Logs"));
+
 
 		logs.setOnMouseClicked(b -> {
 			if (logs.getSelectionModel().getSelectedItem() != null) {
@@ -595,6 +602,8 @@ public class TimeView extends Application {
 
 			// confirm button and its handler
 			Button confirmEdit = new Button("Confirm Edit");
+			confirmEdit.setTooltip(new Tooltip("Confirm The Current Edit"));
+
 
 			confirmEdit.setOnAction(c -> {
 				// changing the session name
@@ -743,6 +752,7 @@ public class TimeView extends Application {
 		HBox deleteEditButtons = new HBox(15);
 		deleteEditButtons.getChildren().addAll(deleteButton, editButton);
 		deleteEditButtons.setAlignment(Pos.CENTER);
+		
 		dates.getChildren().addAll(startDate, endDate);
 		dates.setAlignment(Pos.CENTER);
 		layout.getChildren().addAll(title, logs, deleteEditButtons, enableDateRange, dates, exportButton);
