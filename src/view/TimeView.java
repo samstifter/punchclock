@@ -90,7 +90,6 @@ public class TimeView extends Application {
 	private String newDirPath = "output";
 	
 	//Application States
-	private boolean saveButtonReady = false;
 	private boolean showAppTrackingHelp = true;
 	private boolean showAppTrackingError = false;
 	private boolean miniTimerVisible = false;
@@ -305,7 +304,6 @@ public class TimeView extends Application {
 		// ====Define functionality====
 
 		startButton.setOnAction(a -> {
-			saveButtonReady = true;
 			if (!timeModel.isStarted()) {
 				this.setUIColor(Color.GREEN,"green");
 				startButton.setText("Pause");
