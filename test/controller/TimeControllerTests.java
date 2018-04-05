@@ -1,5 +1,11 @@
+package controller;
 import org.junit.Before;
 import org.junit.Test;
+
+import model.Session;
+import model.TimeModel;
+import model.TimePair;
+import view.TimeView;
 
 import static org.junit.Assert.*;
 
