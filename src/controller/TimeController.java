@@ -1,5 +1,12 @@
+package controller;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import model.Session;
+import model.TimeModel;
+import model.TimePair;
+import view.TimeView;
 
 /**
  * The TimeController class is the Controller component of the MVC framework. It

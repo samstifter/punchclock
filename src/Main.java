@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+import controller.TimeController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -56,6 +57,10 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import model.Session;
+import model.TimeModel;
+import model.TimePair;
+import view.TimeView;
 
 /**
  *
