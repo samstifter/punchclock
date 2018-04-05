@@ -259,17 +259,21 @@ public class TimeView extends Application {
 		miniTimerText.setFont(new Font(45));
 
 		Button startButton = new Button("Start");
+		startButton.setTooltip(new Tooltip("Start/stop the timer"));
 		startButton.setFont(new Font(15));
 
 		Button saveButton = new Button("Save");
+		saveButton.setTooltip(new Tooltip("Save the current session"));
 		saveButton.setFont(new Font(15));
 		saveButton.setDisable(true);
 		
 		Button clearButton = new Button("Clear");
+		clearButton.setTooltip(new Tooltip("Reset the current time"));
 		clearButton.setFont(new Font(15));
 		clearButton.setDisable(true);
 
 		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
+		enableAppTracking.setTooltip(new Tooltip("Track the use of certain applications"));
 
 		Text applicationListTitle = new Text("Application to Track");
 		Text logNameTitle = new Text("Set Session Name");
