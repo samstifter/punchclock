@@ -19,7 +19,8 @@ public class Main {
 		timeModel = new TimeModel();
 		timeView = new TimeView();
 		osVersion = System.getProperty("os.name");
-		timeView.init(timeModel, timeView, timeController,osVersion);
+		timeView.init(timeModel, timeController,osVersion);
 		timeView.startApplication(args);
 	}
+	
 }

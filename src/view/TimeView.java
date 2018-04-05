@@ -101,25 +101,23 @@ public class TimeView extends Application {
     private VBox miniLayout = new VBox(5);
     
     //MVC Instances
-    private TimeModel timeModel;
-	private TimeView timeView;
-	private TimeController timeController;
+    private static TimeModel timeModel;
+	private static TimeView timeView;
+	private static TimeController timeController;
 	
 	//Operating System - To determine if Application can run
-	private String osVersion;
+	private static String osVersion;
 
 	/**
 	 * Initialize the Application
 	 * @param timeModel
-	 * @param timeView
 	 * @param timeController
 	 * @param osVersion
 	 */
-    public void init(TimeModel timeModel, TimeView timeView, TimeController timeController, String osVersion) {
-    	this.timeModel = timeModel;
-    	this.timeController = timeController;
-    	this.timeView = timeView;
-    	this.osVersion = osVersion;
+    public void init(TimeModel timeModel, TimeController timeController, String osVersion) {
+    	TimeView.timeModel = timeModel;
+    	TimeView.timeController = timeController;
+    	TimeView.osVersion = osVersion;
     }
     
     /**
