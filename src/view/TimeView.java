@@ -33,6 +33,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -670,8 +671,15 @@ public class TimeView extends Application {
 
 		// Export Button Handler
 		exportButton.setOnAction(b -> {
-			Alert successfulExportAlert = new Alert(AlertType.INFORMATION, "File Export was Successsful.");
+			Alert successfulExportAlert = new Alert(AlertType.CONFIRMATION, "File Export was Successsful.");
+			successfulExportAlert.setTitle("Export Status");
 			successfulExportAlert.setHeaderText("Success");
+			
+			ButtonType showFile = new ButtonType("View");
+			ButtonType ok = new ButtonType("Ok", ButtonData.OK_DONE);
+			successfulExportAlert.getButtonTypes().setAll(showFile, ok);
+			Optional<ButtonType> result = null;
+			
 			
 			//Choose the directory in which to export
 			DirectoryChooser chooser = new DirectoryChooser();
@@ -690,7 +698,7 @@ public class TimeView extends Application {
 					emptyDateAlert.showAndWait();
 				} else if (startDate.getValue().isBefore(endDate.getValue())) {
 					if (writeToReadableFile(startDate.getValue(), endDate.getValue())) {
-						successfulExportAlert.showAndWait();
+						result = successfulExportAlert.showAndWait();
 					}
 				} else {
 					Alert invalidDateAlert = new Alert(AlertType.ERROR, "Your start date must come before your end date.");
@@ -701,7 +709,15 @@ public class TimeView extends Application {
 				}
 			} else {
 				if (writeToReadableFile()) {
-					successfulExportAlert.showAndWait();
+					result = successfulExportAlert.showAndWait();
+				}
+			}
+			File outFile = new File(newDirPath + "/UserLogs.csv");
+			if (result.get() == showFile){
+				try {
+					Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
+				} catch (IOException e) {
+					// File explorer could not be opened, but write was successful.
 				}
 			}
 		});
