@@ -335,6 +335,7 @@ public class TimeView extends Application {
 			sessionName.clear();
 			saveButton.setDisable(true);
 			clearButton.setDisable(true);
+			enableAppTracking.setDisable(false);
 		});
 		
 		clearButton.setOnAction(a -> {
@@ -346,6 +347,7 @@ public class TimeView extends Application {
 			sessionName.clear();
 			saveButton.setDisable(true);
 			clearButton.setDisable(true);
+			enableAppTracking.setDisable(false);
 		});
 
 		sessionName.setOnKeyReleased(a -> {
