@@ -699,17 +699,6 @@ public class TimeView extends Application {
 			}
 			Optional<ButtonType> result = null;
 			
-			
-			//Choose the directory in which to export
-			DirectoryChooser chooser = new DirectoryChooser();
-			chooser.setTitle("Select Directory");
-			File defaultDirectory = new File("output");
-			chooser.setInitialDirectory(defaultDirectory);
-			File selectedDirectory = chooser.showDialog(previousLogWindow);
-			if (selectedDirectory != null) {
-				newDirPath = selectedDirectory.getAbsolutePath();
-			}
-			
 			if (enableDateRange.isSelected()) {
 				if (startDate.getValue() == null || endDate.getValue() == null) {
 					Alert emptyDateAlert = new Alert(AlertType.ERROR, "At least one of your dates was invalid. Please enter valid dates or diasble dated export");
@@ -717,7 +706,29 @@ public class TimeView extends Application {
 					emptyDateAlert.showAndWait();
 				} else if (startDate.getValue().isBefore(endDate.getValue())) {
 					if (writeToReadableFile(startDate.getValue(), endDate.getValue())) {
+						//Choose the directory in which to export
+						DirectoryChooser chooser = new DirectoryChooser();
+						chooser.setTitle("Select Directory");
+						File defaultDirectory = new File("output");
+						chooser.setInitialDirectory(defaultDirectory);
+						File selectedDirectory = chooser.showDialog(previousLogWindow);
+						File outFile;
+						if (selectedDirectory != null) {
+							newDirPath = selectedDirectory.getAbsolutePath();
+							outFile = new File(newDirPath + "/range" + (getNumberOfExportedRangeFiles() - 1) + ".csv");
+						} else {
+							outFile = new File("output/range" + (getNumberOfExportedRangeFiles() - 1) + ".csv");
+						}
+						
 						result = successfulExportAlert.showAndWait();
+						
+						if (result.get() == showFile){
+							try {
+								Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
+							} catch (IOException e) {
+								// File explorer could not be opened, but write was successful.
+							}
+						}
 					}
 				} else {
 					Alert invalidDateAlert = new Alert(AlertType.ERROR, "Your start date must come before your end date.");
@@ -728,15 +739,30 @@ public class TimeView extends Application {
 				}
 			} else {
 				if (writeToReadableFile()) {
+					
+					//Choose the directory in which to export
+					DirectoryChooser chooser = new DirectoryChooser();
+					chooser.setTitle("Select Directory");
+					File defaultDirectory = new File("output");
+					chooser.setInitialDirectory(defaultDirectory);
+					File selectedDirectory = chooser.showDialog(previousLogWindow);
+					File outFile;
+					if (selectedDirectory != null) {
+						newDirPath = selectedDirectory.getAbsolutePath();
+						outFile = new File(newDirPath + "/UserLogs.csv");
+					} else {
+						outFile = new File("output/UserLogs.csv");
+					}
+					
 					result = successfulExportAlert.showAndWait();
-				}
-			}
-			File outFile = new File(newDirPath + "/UserLogs.csv");
-			if (result.get() == showFile){
-				try {
-					Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
-				} catch (IOException e) {
-					// File explorer could not be opened, but write was successful.
+					
+					if (result.get() == showFile){
+						try {
+							Runtime.getRuntime().exec("explorer.exe /select," + outFile.getAbsolutePath());
+						} catch (IOException e) {
+							// File explorer could not be opened, but write was successful.
+						}
+					}
 				}
 			}
 		});
