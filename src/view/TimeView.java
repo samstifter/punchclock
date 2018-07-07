@@ -751,7 +751,10 @@ public class TimeView extends Application {
 						newDirPath = selectedDirectory.getAbsolutePath();
 						outFile = new File(newDirPath + "/UserLogs.csv");
 					} else {
-						outFile = new File("output/UserLogs.csv");
+						//Null selectedDirectory means that user pressed cancel
+						//Just return
+						return;
+						//outFile = new File("output/UserLogs.csv");
 					}
 					
 					result = successfulExportAlert.showAndWait();
