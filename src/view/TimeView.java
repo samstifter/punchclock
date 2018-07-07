@@ -44,6 +44,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
@@ -283,6 +284,13 @@ public class TimeView extends Application {
 		clearButton.setTooltip(new Tooltip("Reset The Current Time"));
 		clearButton.setFont(new Font(15));
 		clearButton.setDisable(true);
+		
+		//JK
+		Button addNoteButton = new Button("Add Note");
+		addNoteButton.setTooltip(new Tooltip("Add a new note at current time"));
+		addNoteButton.setFont(new Font(15));
+		clearButton.setDisable(false);//on
+		//~JK
 
 		CheckBox enableAppTracking = new CheckBox("Enable Application Tracking");
 		enableAppTracking.setTooltip(new Tooltip("Track The Use Of Certain Applications"));
@@ -402,6 +410,10 @@ public class TimeView extends Application {
 				this.setUIColor(Color.BLACK,"black");
 			}
 		});
+		
+		addNoteButton.setOnAction(a -> {
+			noteWindow();
+		});
 
 		// ====Menu Bar====
 		MenuBar menuBar = new MenuBar();
@@ -447,7 +459,7 @@ public class TimeView extends Application {
 		primaryStage.setTitle("PunchClock");
 		primaryStage.setResizable(false);
 		VBox verticalBox = new VBox(30);
-		Scene scene = new Scene(verticalBox, 400, 400);
+		Scene scene = new Scene(verticalBox, 400, 450);
 		scene.setFill(Color.OLDLACE);
 
 		HBox controlButtons = new HBox(40);
@@ -462,8 +474,13 @@ public class TimeView extends Application {
 		applicationSelect.getChildren().addAll(applicationListTitle, applicationList);
 		applicationSelect.setAlignment(Pos.CENTER);
 
+		/*
+		HBox noteHBox = new HBox(10);
+		noteHBox.getChildren().addAll(addNoteButton);
+		noteHBox.setAlignment(Pos.CENTER);
+		*/
 		verticalBox.getChildren().addAll(menuBar, timerText, logNames, controlButtons, enableAppTracking,
-				applicationSelect);
+				applicationSelect, addNoteButton);
 		verticalBox.setAlignment(Pos.TOP_CENTER);
 
 		// ====Start Background Thread for Timer====
@@ -491,6 +508,32 @@ public class TimeView extends Application {
 		primaryStage.setOnCloseRequest(a -> {
 			Platform.exit();
 		});
+	}
+	
+	/**
+	 * Shows the note taking window
+	 */
+	private void noteWindow() {
+		//SETUP
+		Stage noteWindow = new Stage();
+		noteWindow.initModality(Modality.APPLICATION_MODAL);
+		noteWindow.setTitle("Add Note");
+		
+		VBox layout = new VBox(10);
+		TextArea noteValueField = new TextArea();
+		Button addButton = new Button("Add");
+		addButton.setOnAction(a -> {
+			saveNote(noteValueField.getText());
+			noteWindow.close();
+		});
+		layout.getChildren().addAll(noteValueField,addButton);
+		layout.setAlignment(Pos.CENTER);
+		noteWindow.setScene(new Scene(layout, 300, 300));
+		noteWindow.show();
+	}
+	
+	private void saveNote(String note) {
+		System.out.println(note);
 	}
 
 	/**
