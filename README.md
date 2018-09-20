@@ -1,6 +1,6 @@
 # Punch Clock
 
-![](https://github.com/samstifter/punchclock/blob/master/src/view/icon.png)
+<div style="text-align:center"><img src ="https://github.com/samstifter/punchclock/blob/master/src/view/icon_small.png" /></div>
 
 Our project was an application designed for users who want a way to more easily keep track of how much time they work on their computer. The program is a timer that can either be manually turned on and off or it can be set up to automatically detect when a selected program is opened and keep track of time until it is closed.
 
